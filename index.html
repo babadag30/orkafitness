@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Orka EMS Fitness — Burdur</title>
+<meta name="description" content="Orka EMS Fitness, Burdur'da butik EMS ve fitness stüdyosu. 25 dakikalık, kişiye özel seanslar." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Saira:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:88px;-webkit-text-size-adjust:100%}
+body{margin:0;background:#ffffff;color:#0f0f12;font-family:'Orbitron','Saira',Helvetica,Arial,sans-serif;font-weight:500;font-size:17px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#ffffff 0%,#faf4f5 40%,#f3ebee 70%,#efe6ea 100%)}
+h1,h2,h3{margin:0;font-weight:700;line-height:1.18;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+ul{margin:0;padding:0;list-style:none}
+a{color:#1f61e5;text-decoration:none}
+a:hover{color:#0f0f12}
+table{border-collapse:collapse}
+@keyframes orkaScrollHint{0%{transform:translateY(-100%)}100%{transform:translateY(320%)}}
+@media (max-width:880px){[data-desk]{display:none !important}[data-mob]{display:flex !important}}
+@media (max-width:640px){
+[data-mcenter]{flex-direction:column !important;align-items:center !important;justify-content:center !important;text-align:center !important}
+[data-mcenter-grid]>div{align-items:center !important;text-align:center !important}
+[data-mcenter-grid]>div>*{align-self:center !important}
+}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}[data-anim]{animation:none !important}}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ExerciseGym","name":"Orka EMS Fitness","description":"Burdur'da butik EMS ve fitness stüdyosu. 25 dakikalık, kişiye özel seanslar.","telephone":"+905512744522","address":{"@type":"PostalAddress","streetAddress":"Emek Mah. Yahya Kemal Cad. No: 63/A","addressLocality":"Burdur","addressCountry":"TR"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"08:00","closes":"23:30"},{"@type":"OpeningHoursSpecification","dayOfWeek":["Sunday"],"opens":"10:00","closes":"22:00"}]}
+</script>
+<script src="./image-slot.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+</helmet>
+
+<canvas data-scene-canvas="true" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
+<div data-cursor-glow="true" aria-hidden="true" style="position:fixed;top:0;left:0;width:460px;height:460px;margin:-230px 0 0 -230px;border-radius:999px;z-index:0;pointer-events:none;opacity:0;background:radial-gradient(circle,rgba(232,20,31,0.16) 0%,rgba(232,20,31,0.08) 34%,rgba(232,20,31,0) 68%);will-change:transform,opacity"></div>
+
+<header style="position:fixed;top:0;left:0;right:0;z-index:30;background:#ffffff;border-bottom:1px solid #e0e0e5;transition:transform 0.35s ease;will-change:transform">
+  <div style="max-width:1320px;margin:0 auto;padding:10px clamp(16px,4vw,40px);display:flex;align-items:center;justify-content:space-between;gap:20px">
+    <a href="#top" style="display:flex;align-items:center;gap:12px;color:#0f0f12;flex:none">
+      <img src="uploads/seffaf-orka-ems-fitness-logo.png" alt="Orka EMS Fitness logosu" style="width:48px;height:48px;flex:none;object-fit:contain;display:block" />
+      <span style="font-weight:700;font-size:13px;letter-spacing:0.08em;white-space:nowrap">ORKA EMS FITNESS</span>
+    </a>
+    <nav data-desk="true" style="display:flex;align-items:center;gap:clamp(14px,2vw,30px)">
+      <a href="#ems" style="color:#0f0f12;font-size:12px;font-weight:500;letter-spacing:0.1em">EMS</a>
+      <a href="#hizmetler" style="color:#0f0f12;font-size:12px;font-weight:500;letter-spacing:0.1em">HİZMETLER</a>
+      <a href="#studyo" style="color:#0f0f12;font-size:12px;font-weight:500;letter-spacing:0.1em">STÜDYO</a>
+      <a href="#iletisim" style="color:#0f0f12;font-size:12px;font-weight:500;letter-spacing:0.1em">İLETİŞİM</a>
+      <button type="button" style="background:#6d28d9;color:#ffffff;border:1px solid #6d28d9;border-radius:10px;padding:12px 20px;font-size:12px;font-weight:700;letter-spacing:0.08em;min-height:44px;display:flex;align-items:center;cursor:pointer;font-family:inherit" style-hover="background:#0f0f12;border-color:#0f0f12;color:#ffffff">UYGULAMAYA GİT</button>
+      <a href="tel:+905512744522" style="background:#1f61e5;color:#ffffff;border:1px solid #1f61e5;border-radius:10px;padding:12px 20px;font-size:12px;font-weight:700;letter-spacing:0.08em;min-height:44px;display:flex;align-items:center" style-hover="background:#0f0f12;border-color:#0f0f12;color:#ffffff">RANDEVU AL</a>
+    </nav>
+    <button data-mob="true" type="button" onClick="{{ toggleMenu }}" aria-label="Menü" aria-expanded="{{ menuOpen }}" style="display:none;align-items:center;justify-content:center;width:48px;height:48px;background:#ffffff;border:1px solid #0f0f12;border-radius:10px;cursor:pointer;flex-direction:column;gap:5px;padding:0">
+      <span style="display:block;width:20px;height:2px;background:#0f0f12"></span>
+      <span style="display:block;width:20px;height:2px;background:#0f0f12"></span>
+      <span style="display:block;width:20px;height:2px;background:#0f0f12"></span>
+    </button>
+  </div>
+  <div data-mobmenu="true" aria-hidden="{{ menuClosed }}" style="overflow:hidden;max-height:{{ menuMax }};opacity:{{ menuOpacity }};transition:max-height 0.36s cubic-bezier(0.4,0,0.2,1),opacity 0.3s ease">
+    <nav style="border-top:1px solid #e0e0e5;background:#ffffff;padding:12px clamp(16px,4vw,40px) 20px;display:flex;flex-direction:column;gap:4px">
+      <a href="#ems" onClick="{{ closeMenu }}" style="color:#0f0f12;font-size:14px;font-weight:700;letter-spacing:0.06em;padding:12px 0;border-bottom:1px solid #e0e0e5">EMS</a>
+      <a href="#hizmetler" onClick="{{ closeMenu }}" style="color:#0f0f12;font-size:14px;font-weight:700;letter-spacing:0.06em;padding:12px 0;border-bottom:1px solid #e0e0e5">HİZMETLER</a>
+      <a href="#studyo" onClick="{{ closeMenu }}" style="color:#0f0f12;font-size:14px;font-weight:700;letter-spacing:0.06em;padding:12px 0;border-bottom:1px solid #e0e0e5">STÜDYO</a>
+      <a href="#iletisim" onClick="{{ closeMenu }}" style="color:#0f0f12;font-size:14px;font-weight:700;letter-spacing:0.06em;padding:12px 0;border-bottom:1px solid #e0e0e5">İLETİŞİM</a>
+      <button type="button" onClick="{{ closeMenu }}" style="margin-top:12px;background:#6d28d9;color:#ffffff;border:1px solid #6d28d9;border-radius:10px;padding:14px 20px;font-size:13px;font-weight:700;letter-spacing:0.08em;text-align:center;cursor:pointer;font-family:inherit">UYGULAMAYA GİT</button>
+      <a href="tel:+905512744522" onClick="{{ closeMenu }}" style="margin-top:8px;background:#1f61e5;color:#ffffff;border:1px solid #1f61e5;border-radius:10px;padding:14px 20px;font-size:13px;font-weight:700;letter-spacing:0.08em;text-align:center">RANDEVU AL</a>
+    </nav>
+  </div>
+</header>
+
+<main style="position:relative;z-index:1">
+  <section id="top" data-screen-label="Hero" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px clamp(20px,5vw,64px) 72px;gap:28px">
+    <img src="uploads/seffaf-orka-ems-fitness-logo.png" alt="Orka EMS Fitness logosu" style="width:clamp(280px,58vw,480px);height:clamp(280px,58vw,480px);max-width:100%;object-fit:contain;display:block" />
+    <div data-status-badge="true" style="display:inline-flex;align-items:center;gap:8px;background:#1f9454;color:#0f0f12;border-radius:999px;padding:8px 16px;font-size:12px;font-weight:700;letter-spacing:0.08em">
+      <span style="width:8px;height:8px;border-radius:999px;background:#0f0f12;display:block"></span>
+      <span data-status-text="true">Şu an açık</span>
+    </div>
+    <h1 style="font-size:clamp(28px,6.6vw,68px);letter-spacing:-0.01em;max-width:16ch">25 dakikada tam antrenman</h1>
+    <p style="font-size:clamp(16px,2vw,20px);max-width:38ch;line-height:1.7">Burdur'da butik EMS ve fitness stüdyosu.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+      <a href="tel:+905512744522" style="background:#1f61e5;color:#ffffff;border:1px solid #1f61e5;border-radius:12px;padding:16px 28px;font-size:13px;font-weight:700;letter-spacing:0.08em;min-height:48px;display:flex;align-items:center" style-hover="background:#0f0f12;border-color:#0f0f12;color:#ffffff">RANDEVU AL</a>
+      <a href="#ems" style="background:#ffffff;color:#0f0f12;border:1px solid #0f0f12;border-radius:12px;padding:16px 28px;font-size:13px;font-weight:700;letter-spacing:0.08em;min-height:48px;display:flex;align-items:center" style-hover="border-color:#1f61e5;color:#1f61e5">EMS NEDİR?</a>
+      <button type="button" style="background:#6d28d9;color:#ffffff;border:1px solid #6d28d9;border-radius:12px;padding:16px 28px;font-size:13px;font-weight:700;letter-spacing:0.08em;min-height:48px;display:flex;align-items:center;cursor:pointer;font-family:inherit" style-hover="background:#0f0f12;border-color:#0f0f12;color:#ffffff">UYGULAMAYA GİT</button>
+    </div>
+    <div style="margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="width:1px;height:56px;background:#e0e0e5;overflow:hidden;position:relative">
+        <span data-anim="true" style="position:absolute;top:0;left:0;width:1px;height:18px;background:#0f0f12;animation:orkaScrollHint 2.4s cubic-bezier(0.4,0,0.2,1) infinite"></span>
+      </div>
+      <span style="font-size:10px;letter-spacing:0.2em;color:#0f0f12">KAYDIR</span>
+    </div>
+  </section>
+
+  <section id="ems" data-screen-label="EMS nedir" style="padding:clamp(72px,10vh,140px) clamp(20px,5vw,64px);border-top:1px solid #e0e0e5">
+    <div style="max-width:1320px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(32px,5vw,72px);align-items:start">
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">EMS NEDİR</span>
+        <h2 data-reveal="true" style="font-size:clamp(24px,3.6vw,44px)">Elektriksel kas uyarımı</h2>
+        <p data-reveal="true" style="font-size:17px">EMS, elektriksel kas uyarımının kısaltması. Özel bir kıyafetin üzerindeki elektrotlar kaslara düşük yoğunlukta darbeler iletir, kas bu uyarımla birlikte kasılır.</p>
+        <p data-reveal="true" style="font-size:17px">Klasik antrenmanda kas grupları sırayla çalışır. EMS'te uyarım aynı anda çok sayıda kas grubuna ulaşır; bu yüzden seans süresi kısa tutulur.</p>
+        <p data-reveal="true" style="font-size:17px">Ağır yük kullanılmadığı için eklemlere binen yük düşüktür. Hareketler kontrollü ve yavaştır, seans boyunca bir antrenör yanındadır.</p>
+        <p data-reveal="true" style="font-size:17px">Her seans 25 dakika sürer. Uyarım şiddeti, tempo ve hareket seçimi kişiye göre ayarlanır.</p>
+        <p data-reveal="true" style="font-size:14px;line-height:1.7;border-left:1px solid #e8141f;padding-left:14px">EMS bir tedavi yöntemi değildir. Sağlık durumunla ilgili bir tereddüdün varsa önce hekimine danış.</p>
+      </div>
+      <ul data-reveal="true" style="display:flex;flex-direction:column;gap:16px">
+        <li style="border:1px solid #e0e0e5;border-radius:16px;padding:24px">
+          <div style="font-size:clamp(22px,3vw,32px);font-weight:700">25 dk</div>
+          <div style="font-size:13px;letter-spacing:0.06em;margin-top:6px">SEANS SÜRESİ</div>
+          <div style="height:2px;background:#e0e0e5;margin-top:18px"><div data-bar="true" style="height:2px;width:100%;background:#1f61e5"></div></div>
+        </li>
+        <li style="border:1px solid #e0e0e5;border-radius:16px;padding:24px">
+          <div style="font-size:clamp(22px,3vw,32px);font-weight:700">En fazla 3 kişi</div>
+          <div style="font-size:13px;letter-spacing:0.06em;margin-top:6px">AYNI ANDA STÜDYODA</div>
+          <div style="height:2px;background:#e0e0e5;margin-top:18px"><div data-bar="true" style="height:2px;width:100%;background:#1f61e5"></div></div>
+        </li>
+        <li style="border:1px solid #e0e0e5;border-radius:16px;padding:24px">
+          <div style="font-size:clamp(22px,3vw,32px);font-weight:700">Kişiye özel</div>
+          <div style="font-size:13px;letter-spacing:0.06em;margin-top:6px">PROGRAM VE UYARIM ŞİDDETİ</div>
+          <div style="height:2px;background:#e0e0e5;margin-top:18px"><div data-bar="true" style="height:2px;width:100%;background:#1f61e5"></div></div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="hizmetler" data-screen-label="Hizmetler" style="padding:clamp(72px,10vh,140px) clamp(20px,5vw,64px);border-top:1px solid #e0e0e5">
+    <div style="max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,4vw,48px)">
+      <div style="display:flex;flex-direction:column;gap:16px;max-width:56ch">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">HİZMETLER</span>
+        <h2 style="font-size:clamp(24px,3.6vw,44px)">İki çalışma biçimi</h2>
+        <p style="font-size:17px">Her ikisi de 25 dakika sürer ve antrenör eşliğinde yapılır. Kontenjan sınırlıdır.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(288px,1fr));gap:20px">
+        <article data-reveal="true" style="background:#ffffff;border:1px solid #e0e0e5;border-radius:16px;padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:14px" style-hover="border-color:#1f61e5">
+          <h3 style="font-size:clamp(20px,2.4vw,28px);color:#e8141f">EMS</h3>
+          <div style="font-size:13px;letter-spacing:0.06em">25 DAKİKA · 1–3 KİŞİ</div>
+          <p style="font-size:16px">Elektrot kıyafetiyle yapılan uyarımlı antrenman. Antrenör uyarım şiddetini seans boyunca kişiye göre ayarlar. Çift seansı yalnızca bu hizmette geçerlidir.</p>
+        </article>
+        <article data-reveal="true" style="background:#ffffff;border:1px solid #e0e0e5;border-radius:16px;padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:14px" style-hover="border-color:#1f61e5">
+          <h3 style="font-size:clamp(20px,2.4vw,28px);color:#0f0f12">Fitness</h3>
+          <div style="font-size:13px;letter-spacing:0.06em">25 DAKİKA · 1 KİŞİ</div>
+          <p style="font-size:16px">Birebir çalışılan klasik antrenman. Program ve tempo tek kişiye göre kurulur, stüdyo o seans boyunca yalnızca sana ayrılır.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="kapasite" data-screen-label="Nasıl çalışır" style="padding:clamp(72px,10vh,140px) clamp(20px,5vw,64px);border-top:1px solid #e0e0e5">
+    <div style="max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,4vw,44px)">
+      <div data-reveal="true" style="display:flex;flex-direction:column;gap:16px;max-width:60ch">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">NASIL ÇALIŞIR</span>
+        <h2 style="font-size:clamp(24px,3.6vw,44px)">Aynı anda en fazla 3 kişi</h2>
+        <p style="font-size:17px">Stüdyoda tek seferde üç kişiden fazlası çalışmaz. Bu yüzden her seans saatinin bir durumu vardır.</p>
+      </div>
+      <ul data-reveal="true" style="display:flex;flex-wrap:wrap;gap:12px">
+        <li style="display:flex;align-items:center;gap:10px;border:1px solid #e0e0e5;border-radius:12px;padding:12px 16px;font-size:13px">
+          <span style="width:14px;height:14px;border-radius:4px;background:#1f9454;display:block;flex:none"></span>Doğrudan randevu alınabilir
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;border:1px solid #e0e0e5;border-radius:12px;padding:12px 16px;font-size:13px">
+          <span style="width:14px;height:14px;border-radius:4px;background:#f58c1a;display:block;flex:none"></span>Kısmen dolu, yönetici onayı gerekir
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;border:1px solid #e0e0e5;border-radius:12px;padding:12px 16px;font-size:13px">
+          <span style="width:14px;height:14px;border-radius:4px;background:#e8141f;display:block;flex:none"></span>Kapalı veya dolu
+        </li>
+      </ul>
+      <div data-reveal="true" style="border:1px solid #e0e0e5;border-radius:16px;padding:clamp(16px,3vw,28px);background:#ffffff;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:12px;letter-spacing:0.14em">ÖRNEK GÜN · PAZARTESİ</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
+          <div data-tile="true" style="border:1px solid #0f0f12;border-radius:10px;padding:18px 10px;text-align:center;font-size:15px;font-weight:700;background:#1f9454;color:#0f0f12">08:00</div>
+          <div data-tile="true" style="border:1px solid #0f0f12;border-radius:10px;padding:18px 10px;text-align:center;font-size:15px;font-weight:700;background:#1f9454;color:#0f0f12">10:00</div>
+          <div data-tile="true" style="border:1px solid #0f0f12;border-radius:10px;padding:18px 10px;text-align:center;font-size:15px;font-weight:700;background:#f58c1a;color:#0f0f12">12:00</div>
+          <div data-tile="true" style="border:1px solid #0f0f12;border-radius:10px;padding:18px 10px;text-align:center;font-size:15px;font-weight:700;background:#1f9454;color:#0f0f12">14:00</div>
+          <div data-tile="true" style="border:1px solid #0f0f12;border-radius:10px;padding:18px 10px;text-align:center;font-size:15px;font-weight:700;background:#e8141f;color:#ffffff">16:00</div>
+          <div data-tile="true" style="border:1px solid #0f0f12;border-radius:10px;padding:18px 10px;text-align:center;font-size:15px;font-weight:700;background:#1f9454;color:#0f0f12">18:00</div>
+          <div data-tile="true" style="border:1px solid #0f0f12;border-radius:10px;padding:18px 10px;text-align:center;font-size:15px;font-weight:700;background:#f58c1a;color:#0f0f12">20:00</div>
+          <div data-tile="true" style="border:1px solid #0f0f12;border-radius:10px;padding:18px 10px;text-align:center;font-size:15px;font-weight:700;background:#1f9454;color:#0f0f12">22:00</div>
+        </div>
+        <p style="font-size:14px">Turuncu saatlerde talebini iletirsin, stüdyo onaylar. Kırmızı saatler kapalıdır.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="cift" data-screen-label="Çift seansı" style="padding:clamp(72px,10vh,140px) clamp(20px,5vw,64px);border-top:1px solid #e0e0e5">
+    <div style="max-width:1320px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(32px,5vw,72px);align-items:center">
+      <div data-reveal="true" style="display:flex;flex-direction:column;gap:18px">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">ÇİFT SEANSI</span>
+        <h2 style="font-size:clamp(24px,3.6vw,44px)">İki kişilik kapalı seans</h2>
+        <p style="font-size:17px">İki profil birbirine partner olarak bağlanabilir. "Partnerimle" modunda seans yalnızca bu iki kişiye ayrılır; üçüncü kişiye kapanır.</p>
+        <p style="font-size:17px">Antrenör iki kişinin programını birlikte kurar. Çift seansı yalnızca EMS için geçerlidir.</p>
+      </div>
+      <div data-reveal="true" style="border:1px solid #e0e0e5;border-radius:16px;padding:clamp(24px,4vw,44px);background:#ffffff;display:flex;flex-direction:column;gap:24px">
+        <div style="display:inline-flex;align-self:flex-start;align-items:center;gap:8px;border:1px solid #1f61e5;color:#1f61e5;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.06em">PARTNERİMLE</div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <span style="width:64px;height:64px;border-radius:999px;border:1px solid #0f0f12;display:block;flex:none"></span>
+          <span style="width:36px;height:1px;background:#1f61e5;display:block;flex:none"></span>
+          <span style="width:64px;height:64px;border-radius:999px;border:1px solid #0f0f12;display:block;flex:none"></span>
+          <span style="width:36px;height:1px;background:#e0e0e5;display:block;flex:none"></span>
+          <span style="width:64px;height:64px;border-radius:999px;border:1px dashed #e0e0e5;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:0.08em;color:#0f0f12;flex:none;text-align:center">KAPALI</span>
+        </div>
+        <p style="font-size:14px">İki bağlı profil · üçüncü kontenjan kapalı</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="studyo" data-screen-label="Stüdyo" style="padding:clamp(72px,10vh,140px) clamp(20px,5vw,64px);border-top:1px solid #e0e0e5">
+    <div style="max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,4vw,44px)">
+      <div style="display:flex;flex-direction:column;gap:16px;max-width:56ch">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">STÜDYO</span>
+        <h2 style="font-size:clamp(24px,3.6vw,44px)">Burdur, Emek Mahallesi</h2>
+        <p style="font-size:17px">Tek salonlu, üç kişilik kapasiteye göre kurulmuş bir stüdyo. Cihazlar, kıyafetler ve alan her seans arasında hazırlanır. Kalabalık yok, sıra beklemek yok.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div data-reveal="true" style="border:1px solid #e0e0e5;border-radius:16px;overflow:hidden;aspect-ratio:16/10">
+          <img src="uploads/1-.png" alt="Orka EMS Fitness stüdyosu — ekipman rafı ve marka duvarı" loading="lazy" role="button" tabindex="0" onClick="{{ openLightbox }}" onKeyDown="{{ keyLightbox }}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer" />
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+          <div data-reveal="true" style="border:1px solid #e0e0e5;border-radius:16px;overflow:hidden;aspect-ratio:3/4">
+            <img src="uploads/2-.png" alt="Stüdyo iç mekân — ağırlık ve fonksiyonel antrenman alanı" loading="lazy" role="button" tabindex="0" onClick="{{ openLightbox }}" onKeyDown="{{ keyLightbox }}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer" />
+          </div>
+          <div data-reveal="true" style="border:1px solid #e0e0e5;border-radius:16px;overflow:hidden;aspect-ratio:3/4">
+            <img src="uploads/3-.png" alt="Stüdyo antrenman alanı ve duvar yazısı" loading="lazy" role="button" tabindex="0" onClick="{{ openLightbox }}" onKeyDown="{{ keyLightbox }}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer" />
+          </div>
+          <div data-reveal="true" style="border:1px solid #e0e0e5;border-radius:16px;overflow:hidden;aspect-ratio:3/4">
+            <img src="uploads/4-.png" alt="Kardiyo alanı — koşu bandı ve eliptik bisiklet" loading="lazy" role="button" tabindex="0" onClick="{{ openLightbox }}" onKeyDown="{{ keyLightbox }}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="randevu" data-screen-label="Randevu" style="padding:clamp(72px,10vh,132px) clamp(20px,5vw,64px);border-top:1px solid #0f0f12;border-bottom:1px solid #0f0f12;background:#ffffff">
+    <div style="max-width:1320px;margin:0 auto;display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px">
+      <h2 style="font-size:clamp(26px,4.4vw,56px);max-width:22ch">Seans saatini konuşalım</h2>
+      <p style="font-size:17px;max-width:52ch">Randevular stüdyonun mobil uygulamasından alınır. Uygulamaya erişim ve uygun saatler için WhatsApp'tan yaz; konumumuz aşağıda.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+        <a href="https://wa.me/905512744522" target="_blank" rel="noopener" style="flex:1 1 220px;max-width:300px;justify-content:center;background:#1f61e5;color:#ffffff;border:1px solid #1f61e5;border-radius:12px;padding:16px 28px;font-size:13px;font-weight:700;letter-spacing:0.08em;min-height:48px;display:flex;align-items:center" style-hover="background:#0f0f12;border-color:#0f0f12;color:#ffffff">RANDEVU AL · WHATSAPP</a>
+        <a href="tel:+905512744522" style="flex:1 1 220px;max-width:300px;justify-content:center;background:#ffffff;color:#0f0f12;border:1px solid #0f0f12;border-radius:12px;padding:16px 28px;font-size:13px;font-weight:700;letter-spacing:0.08em;min-height:48px;display:flex;align-items:center" style-hover="border-color:#1f61e5;color:#1f61e5">ARA · 0551 274 45 22</a>
+      </div>
+      <div style="width:100%;max-width:900px;display:flex;flex-direction:column;gap:12px">
+        <iframe title="Orka EMS Fitness konumu — Emek Mah. Yahya Kemal Cad. No: 63/A, Burdur" src="https://maps.google.com/maps?q=Emek%20Mah.%20Yahya%20Kemal%20Cad.%20No%2063A%20Burdur&t=&z=15&ie=UTF8&iwloc=&output=embed" loading="lazy" style="width:100%;height:clamp(260px,42vh,380px);border:1px solid #e0e0e5;border-radius:16px;display:block"></iframe>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Emek%20Mah.%20Yahya%20Kemal%20Cad.%20No%2063A%20Burdur" target="_blank" rel="noopener" style="align-self:stretch;justify-content:center;background:#f58c1a;color:#0f0f12;border:1px solid #f58c1a;border-radius:12px;padding:16px 26px;font-size:13px;font-weight:700;letter-spacing:0.08em;min-height:48px;display:flex;align-items:center" style-hover="background:#0f0f12;border-color:#0f0f12;color:#ffffff">YOL TARİFİ AL</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="instagram" data-screen-label="Instagram" style="padding:clamp(72px,10vh,132px) clamp(20px,5vw,64px);border-top:1px solid #e0e0e5">
+    <div style="max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(24px,4vw,40px)">
+      <div data-mcenter="true" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:56ch">
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">INSTAGRAM</span>
+          <h2 style="font-size:clamp(24px,3.6vw,44px)">Stüdyodan son paylaşımlar</h2>
+          <p style="font-size:17px">@fit2tech.burdur hesabındaki güncel gönderiler.</p>
+        </div>
+        <a href="https://www.instagram.com/fit2tech.burdur/" target="_blank" rel="noopener" style="background:#1f61e5;color:#ffffff;border:1px solid #1f61e5;border-radius:12px;padding:14px 24px;font-size:13px;font-weight:700;letter-spacing:0.08em;min-height:48px;display:flex;align-items:center" style-hover="background:#0f0f12;border-color:#0f0f12;color:#ffffff">TAKİP ET</a>
+      </div>
+      <div data-ig-feed="true" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">{{ igFeed }}</div>
+      <p style="font-size:13px;color:#0f0f12;opacity:0.7">Gönderiler Instagram hesabından otomatik güncellenir.</p>
+    </div>
+  </section>
+
+  <section id="iletisim" data-screen-label="İletişim" style="padding:clamp(64px,8vh,112px) clamp(20px,5vw,64px) 40px">
+    <div data-reveal="true" data-mcenter-grid="true" style="max-width:1320px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:clamp(28px,4vw,56px)">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">İLETİŞİM</span>
+        <h2 style="font-size:clamp(22px,2.8vw,32px)">Orka EMS Fitness</h2>
+        <a href="https://maps.google.com/?q=Emek+Mah.+Yahya+Kemal+Cad.+No+63A+Burdur" target="_blank" rel="noopener" style="font-size:16px;line-height:1.7;color:#1f61e5" style-hover="color:#0f0f12">Emek Mah. Yahya Kemal Cad. No: 63/A, Burdur</a>
+        <a href="tel:+905512744522" style="font-size:16px;color:#0f0f12" style-hover="color:#1f61e5">0551 274 45 22</a>
+        <a href="https://wa.me/905512744522" target="_blank" rel="noopener" style="font-size:16px;color:#0f0f12" style-hover="color:#1f61e5">WhatsApp</a>
+        <a href="https://www.instagram.com/fit2tech.burdur/" target="_blank" rel="noopener" style="font-size:16px;color:#0f0f12" style-hover="color:#1f61e5">Instagram · @fit2tech.burdur</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">ÇALIŞMA SAATLERİ</span>
+        <table style="width:100%;font-size:15px">
+          <tbody>
+            <tr>
+              <th scope="row" style="text-align:left;font-weight:500;padding:10px 0;border-bottom:1px solid #e0e0e5">Pazartesi – Cumartesi</th>
+              <td style="text-align:right;font-weight:700;padding:10px 0;border-bottom:1px solid #e0e0e5;white-space:nowrap">08:00 – 23:30</td>
+            </tr>
+            <tr>
+              <th scope="row" style="text-align:left;font-weight:500;padding:10px 0;border-bottom:1px solid #e0e0e5">Pazar</th>
+              <td style="text-align:right;font-weight:700;padding:10px 0;border-bottom:1px solid #e0e0e5;white-space:nowrap">10:00 – 22:00</td>
+            </tr>
+          </tbody>
+        </table>
+        <div data-status-badge="true" style="display:inline-flex;align-self:flex-start;align-items:center;gap:8px;background:#1f9454;color:#0f0f12;border-radius:999px;padding:8px 16px;font-size:12px;font-weight:700;letter-spacing:0.08em">
+          <span style="width:8px;height:8px;border-radius:999px;background:#0f0f12;display:block"></span>
+          <span data-status-text="true">Şu an açık</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.22em;color:#e8141f">RANDEVU</span>
+        <p style="font-size:16px">Randevular mobil uygulamadan alınır. Uygulamaya erişim için ara veya yaz.</p>
+        <a href="tel:+905512744522" style="background:#1f61e5;color:#ffffff;border:1px solid #1f61e5;border-radius:12px;padding:14px 24px;font-size:13px;font-weight:700;letter-spacing:0.08em;min-height:48px;display:flex;align-items:center;justify-content:center;align-self:flex-start" style-hover="background:#0f0f12;border-color:#0f0f12;color:#ffffff">RANDEVU AL</a>
+      </div>
+    </div>
+  </section>
+
+  <sc-if value="{{ lightboxOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeLightbox }}" role="dialog" aria-modal="true" aria-label="Stüdyo görseli" style="position:fixed;inset:0;z-index:60;background:rgba(15,15,18,0.92);display:flex;align-items:center;justify-content:center;padding:clamp(16px,4vw,48px);cursor:zoom-out">
+      <button type="button" onClick="{{ closeLightbox }}" aria-label="Kapat" style="position:absolute;top:16px;right:16px;width:48px;height:48px;border-radius:999px;background:#ffffff;color:#0f0f12;border:1px solid #0f0f12;font-size:20px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center">×</button>
+      {{ lightboxImg }}
+    </div>
+  </sc-if>
+  <footer style="padding:32px clamp(20px,5vw,64px) 48px;border-top:1px solid #e0e0e5">
+    <div data-mcenter="true" style="max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <img src="uploads/seffaf-orka-ems-fitness-logo.png" alt="Orka EMS Fitness logosu" style="width:64px;height:64px;flex:none;object-fit:contain;display:block" />
+        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em">ORKA EMS FITNESS</span>
+      </div>
+      <div data-mcenter="true" style="display:flex;flex-direction:column;gap:6px;text-align:right">
+        <span style="font-size:12px;letter-spacing:0.04em">© 2026 Orka EMS Fitness · Burdur</span>
+        <span style="font-size:12px;letter-spacing:0.04em;color:#0f0f12">designed by <a href="https://www.instagram.com/lilideatr/" target="_blank" rel="noopener" style="color:#0f0f12;font-weight:700" style-hover="color:#1f61e5">Lilidea</a> · <a href="https://www.instagram.com/hsnbabadag/" target="_blank" rel="noopener" style="color:#0f0f12;font-weight:700" style-hover="color:#1f61e5">hsnbabadag</a></span>
+      </div>
+    </div>
+  </footer>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;particleDensity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.3,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;3D sahne&quot;},&quot;scene3dEnabled&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;3D sahne&quot;},&quot;statusOverride&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;open&quot;,&quot;closed&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Durum rozeti&quot;},&quot;instagramToken&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Instagram&quot;}}">
+class Component extends DCLogic {
+  state = { menuOpen: false, igStatus: 'idle', igPosts: null };
+  IG_PROFILE = 'https://www.instagram.com/fit2tech.burdur/';
+
+  componentDidMount() {
+    this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.mx = 0; this.my = 0; this.tiltX = 0; this.tiltY = 0;
+    this.cur = 0; this.target = 0;
+    this.updateBadges();
+    this.badgeTimer = setInterval(() => this.updateBadges(), 60000);
+    this.onResize = () => this.resize();
+    this.onPointer = (e) => {
+      this.mx = (e.clientX / window.innerWidth) * 2 - 1;
+      this.my = (e.clientY / window.innerHeight) * 2 - 1;
+    };
+    this.onEsc = (e) => { if (e.key === 'Escape' && this.state.lightboxSrc) this.setState({ lightboxSrc: null }); };
+    window.addEventListener('keydown', this.onEsc);
+    this.lastY = window.scrollY;
+    this._hHide = false;
+    this.onScroll = () => this.updateHeader();
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+    this.updateHeader();
+    this.initGlow();
+    this.loadInstagram();
+    this.boot();
+  }
+
+  loadInstagram() {
+    const token = this.props.instagramToken;
+    if (!token) { this.setState({ igStatus: 'fallback' }); return; }
+    this.setState({ igStatus: 'loading' });
+    const url = 'https://graph.instagram.com/me/media?fields=id,media_type,media_url,permalink,thumbnail_url,caption&limit=6&access_token=' + encodeURIComponent(token);
+    fetch(url)
+      .then(r => r.json())
+      .then(d => {
+        if (d && Array.isArray(d.data) && d.data.length) {
+          const posts = d.data
+            .map(p => ({ id: p.id, permalink: p.permalink, caption: p.caption || 'Instagram gönderisi', img: p.media_type === 'VIDEO' ? p.thumbnail_url : p.media_url }))
+            .filter(p => p.img).slice(0, 5);
+          this.setState({ igPosts: posts, igStatus: posts.length ? 'ok' : 'fallback' });
+        } else {
+          this.setState({ igStatus: 'fallback' });
+        }
+      })
+      .catch(() => this.setState({ igStatus: 'fallback' }));
+  }
+
+  buildIgFeed() {
+    const R = React.createElement;
+    const tileBase = { display: 'block', aspectRatio: '1 / 1', border: '1px solid #e0e0e5', borderRadius: '12px', overflow: 'hidden', position: 'relative', textDecoration: 'none' };
+    if (this.state.igStatus === 'ok' && this.state.igPosts) {
+      return this.state.igPosts.map(p => R('a', { key: p.id, href: p.permalink, target: '_blank', rel: 'noopener', title: p.caption, style: tileBase },
+        R('img', { src: p.img, alt: (p.caption || '').slice(0, 120), loading: 'lazy', style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } })
+      ));
+    }
+    const local = [
+      'uploads/fit2tech.burdur_1783708830_3938357134747217661_58597298047_1.jpg',
+      'uploads/fit2tech.burdur_1784756055_3947142014935052809_58597298047_1.jpg',
+      'uploads/fit2tech.turkiye_1775553842_3869948580882838457_9618356685_1.webp',
+      'uploads/fit2tech.turkiye_1776853771_3880853094657697310_9618356685_1.webp',
+      'uploads/fit2tech.turkiye_1779186410_3900420749628973046_9618356685_1.webp',
+      'uploads/fit2tech.burdur_1774913165_3864574136656132182_58597298047_1.jpg'
+    ];
+    return local.map((src, i) => R('a', { key: i, href: this.IG_PROFILE, target: '_blank', rel: 'noopener', 'aria-label': 'Fit2tech Instagram gönderisini aç', style: tileBase },
+      R('img', { src: src, alt: 'Fit2tech Instagram gönderisi', loading: 'lazy', style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } })
+    ));
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.particleDensity !== this.props.particleDensity || prev.scene3dEnabled !== this.props.scene3dEnabled) {
+      this.teardownScene();
+      if (this.props.scene3dEnabled !== false) this.boot();
+    }
+    if (prev.statusOverride !== this.props.statusOverride) this.updateBadges();
+    if (prev.instagramToken !== this.props.instagramToken) this.loadInstagram();
+    this.updateHeader();
+  }
+
+  updateHeader() {
+    const h = this.headerEl || (this.headerEl = document.querySelector('header'));
+    if (!h) return;
+    let hide;
+    if (this.state.lightboxSrc) {
+      hide = true;
+    } else if (this.state.menuOpen) {
+      hide = false;
+      this.lastY = window.scrollY;
+    } else {
+      const y = window.scrollY;
+      if (y < 120) hide = false;
+      else if (y > this.lastY + 5) hide = true;
+      else if (y < this.lastY - 5) hide = false;
+      else hide = this._hHide;
+      this.lastY = y;
+    }
+    this._hHide = hide;
+    h.style.transform = hide ? 'translateY(-100%)' : 'translateY(0)';
+  }
+
+  componentWillUnmount() {
+    if (this.onEsc) window.removeEventListener('keydown', this.onEsc);
+    if (this.onScroll) window.removeEventListener('scroll', this.onScroll);
+    clearInterval(this.badgeTimer);
+    this.teardownScene();
+    if (this.glowRaf) cancelAnimationFrame(this.glowRaf);
+    if (this.onGlowMove) {
+      window.removeEventListener('pointermove', this.onGlowMove);
+      window.removeEventListener('pointerleave', this.onGlowLeave);
+    }
+    if (window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(t => t.kill());
+  }
+
+  initGlow() {
+    if (this.reduced) return;
+    const el = document.querySelector('[data-cursor-glow]');
+    if (!el || matchMedia('(pointer:coarse)').matches) return;
+    this.glowEl = el;
+    this.gx = window.innerWidth / 2; this.gy = window.innerHeight / 2;
+    this.gtx = this.gx; this.gty = this.gy; this.gOpacity = 0; this.gTargetO = 0;
+    this.onGlowMove = (e) => { this.gtx = e.clientX; this.gty = e.clientY; this.gTargetO = 1; };
+    this.onGlowLeave = () => { this.gTargetO = 0; };
+    window.addEventListener('pointermove', this.onGlowMove, { passive: true });
+    window.addEventListener('pointerleave', this.onGlowLeave, { passive: true });
+    const loop = () => {
+      this.glowRaf = requestAnimationFrame(loop);
+      this.gx += (this.gtx - this.gx) * 0.12;
+      this.gy += (this.gty - this.gy) * 0.12;
+      this.gOpacity += (this.gTargetO - this.gOpacity) * 0.08;
+      el.style.transform = 'translate(' + this.gx + 'px,' + this.gy + 'px)';
+      el.style.opacity = this.gOpacity.toFixed(3);
+    };
+    this.glowRaf = requestAnimationFrame(loop);
+  }
+
+  teardownScene() {
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.raf = null;
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('pointermove', this.onPointer);
+    if (this.renderer) { this.renderer.dispose(); this.renderer = null; }
+    if (this.geo) { this.geo.dispose(); this.geo = null; }
+  }
+
+  isOpen() {
+    const ov = this.props.statusOverride;
+    if (ov === 'open') return true;
+    if (ov === 'closed') return false;
+    const now = new Date();
+    const m = now.getHours() * 60 + now.getMinutes();
+    if (now.getDay() === 0) return m >= 600 && m < 1320;
+    return m >= 480 && m < 1410;
+  }
+
+  updateBadges() {
+    const open = this.isOpen();
+    document.querySelectorAll('[data-status-badge]').forEach(el => {
+      el.style.background = open ? '#1f9454' : '#e0e0e5';
+      el.style.color = '#0f0f12';
+      const t = el.querySelector('[data-status-text]');
+      if (t) t.textContent = open ? 'Şu an açık' : 'Şu an kapalı';
+    });
+  }
+
+  waitFor(test, ms) {
+    const t0 = Date.now();
+    return new Promise(res => {
+      const step = () => {
+        if (test()) return res(true);
+        if (Date.now() - t0 > (ms || 10000)) return res(false);
+        setTimeout(step, 60);
+      };
+      step();
+    });
+  }
+
+  async boot() {
+    if (this.props.scene3dEnabled === false) return;
+    const ok = await this.waitFor(() => window.THREE && window.gsap && window.ScrollTrigger);
+    if (!ok || !this.canvasAlive()) return;
+    if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+    window.gsap.registerPlugin(window.ScrollTrigger);
+    this.initScene();
+    this.initScroll();
+  }
+
+  canvasAlive() {
+    this.canvas = document.querySelector('[data-scene-canvas]');
+    return !!this.canvas;
+  }
+
+  /* ---------- particle shapes ---------- */
+  shapeTorus(N) {
+    const a = new Float32Array(N * 3), R = 2.05, r = 0.5;
+    for (let i = 0; i < N; i++) {
+      const u = Math.random() * Math.PI * 2, v = Math.random() * Math.PI * 2;
+      a[i * 3] = (R + r * Math.cos(v)) * Math.cos(u);
+      a[i * 3 + 1] = (R + r * Math.cos(v)) * Math.sin(u);
+      a[i * 3 + 2] = r * Math.sin(v) * 1.2;
+    }
+    return a;
+  }
+
+  shapeWave(N) {
+    const a = new Float32Array(N * 3);
+    this.waveX = new Float32Array(N);
+    this.waveAmp = new Float32Array(N);
+    this.waveJit = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      const x = (Math.random() * 2 - 1) * 3.4;
+      this.waveX[i] = x;
+      this.waveAmp[i] = 0.35 + Math.random() * 0.85;
+      this.waveJit[i] = (Math.random() - 0.5) * 0.16;
+      a[i * 3] = x;
+      a[i * 3 + 1] = Math.sin(x * 2.3) * this.waveAmp[i] + this.waveJit[i];
+      a[i * 3 + 2] = (Math.random() - 0.5) * 0.45;
+    }
+    return a;
+  }
+
+  updateWave(t) {
+    const a = this.shapes[1], N = this.count;
+    for (let i = 0; i < N; i++) {
+      const x = this.waveX[i];
+      const env = 0.6 + 0.4 * Math.sin(x * 1.7 + 1.1);
+      a[i * 3 + 1] = Math.sin(x * 2.3 - t * 1.9) * this.waveAmp[i] * env + this.waveJit[i];
+    }
+  }
+
+  shapeTwoClusters(N) {
+    const a = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const side = i % 2 === 0 ? -1 : 1;
+      const r = 0.95 * Math.cbrt(Math.random());
+      const th = Math.random() * Math.PI * 2, ph = Math.acos(Math.random() * 2 - 1);
+      a[i * 3] = side * 1.65 + r * Math.sin(ph) * Math.cos(th);
+      a[i * 3 + 1] = r * Math.sin(ph) * Math.sin(th);
+      a[i * 3 + 2] = r * Math.cos(ph) * 0.6;
+    }
+    return a;
+  }
+
+  shapeText(N, text) {
+    const w = 640, h = 320;
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = "700 200px Orbitron, Helvetica, sans-serif";
+    ctx.fillText(text, w / 2, h / 2 + 6);
+    const data = ctx.getImageData(0, 0, w, h).data;
+    const pts = [];
+    for (let y = 0; y < h; y += 2) {
+      for (let x = 0; x < w; x += 2) {
+        if (data[(y * w + x) * 4 + 3] > 128) pts.push(x, y);
+      }
+    }
+    const a = new Float32Array(N * 3);
+    const scale = 5.6 / w;
+    if (!pts.length) return this.shapeTwoClusters(N);
+    for (let i = 0; i < N; i++) {
+      const k = (Math.floor(Math.random() * (pts.length / 2))) * 2;
+      a[i * 3] = (pts[k] - w / 2) * scale + (Math.random() - 0.5) * 0.02;
+      a[i * 3 + 1] = -(pts[k + 1] - h / 2) * scale + (Math.random() - 0.5) * 0.02;
+      a[i * 3 + 2] = (Math.random() - 0.5) * 0.14;
+    }
+    return a;
+  }
+
+  shapeField(N) {
+    const a = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      a[i * 3] = (Math.random() * 2 - 1) * 4.2;
+      a[i * 3 + 1] = (Math.random() * 2 - 1) * 2.3;
+      a[i * 3 + 2] = (Math.random() * 2 - 1) * 1.4;
+    }
+    return a;
+  }
+
+  /* ---------- scene ---------- */
+  initScene() {
+    const T = window.THREE;
+    const mobile = window.innerWidth < 768;
+    const dens = typeof this.props.particleDensity === 'number' ? this.props.particleDensity : 1;
+    const N = Math.max(800, Math.round((mobile ? 3000 : 10000) * dens));
+    this.count = N;
+
+    this.shapes = [
+      this.shapeTorus(N),
+      this.shapeWave(N),
+      this.shapeTwoClusters(N),
+      this.shapeText(N, '25'),
+      this.shapeField(N)
+    ];
+
+    this.scene = new T.Scene();
+    this.camera = new T.PerspectiveCamera(52, 1, 0.1, 100);
+    this.camera.position.set(0, 0, 6.2);
+
+    this.renderer = new T.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: false, powerPreference: 'high-performance' });
+    this.renderer.setClearAlpha(0);
+
+    this.geo = new T.BufferGeometry();
+    const pos = new Float32Array(this.shapes[0]);
+    const col = new Float32Array(N * 3);
+    const red = new T.Color('#e8141f'), black = new T.Color('#0f0f12');
+    for (let i = 0; i < N; i++) {
+      const c = Math.random() < 0.08 ? red : black;
+      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+    }
+    this.geo.setAttribute('position', new T.BufferAttribute(pos, 3));
+    this.geo.setAttribute('color', new T.BufferAttribute(col, 3));
+    this.posAttr = this.geo.getAttribute('position');
+
+    const mat = new T.PointsMaterial({ size: mobile ? 0.026 : 0.021, vertexColors: true, transparent: true, opacity: 0.5, depthWrite: false, sizeAttenuation: true });
+    this.points = new T.Points(this.geo, mat);
+    this.group = new T.Group();
+    this.group.add(this.points);
+    this.scene.add(this.group);
+
+    this.resize();
+    window.addEventListener('resize', this.onResize);
+    if (!this.reduced) {
+      window.addEventListener('pointermove', this.onPointer, { passive: true });
+      this.tick = this.tick.bind(this);
+      this.raf = requestAnimationFrame(this.tick);
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
+  }
+
+  resize() {
+    if (!this.renderer) return;
+    const w = window.innerWidth, h = window.innerHeight;
+    this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    this.renderer.setSize(w, h, false);
+    this.camera.aspect = w / h;
+    this.camera.position.z = w < 700 ? 8.2 : 6.2;
+    this.camera.updateProjectionMatrix();
+    if (this.reduced) this.renderer.render(this.scene, this.camera);
+  }
+
+  tick() {
+    this.raf = requestAnimationFrame(this.tick);
+    const t = performance.now() / 1000;
+    this.cur += (this.target - this.cur) * 0.055;
+    const last = this.shapes.length - 1;
+    const seg = Math.max(0, Math.min(last, this.cur));
+    const i0 = Math.floor(seg), i1 = Math.min(i0 + 1, last);
+    let f = seg - i0;
+    f = f * f * (3 - 2 * f);
+
+    if (seg > 0.02 && seg < 2.4) this.updateWave(t);
+
+    const a = this.shapes[i0], b = this.shapes[i1], p = this.posAttr.array;
+    if (i0 === i1 || f < 0.0005) {
+      p.set(a);
+    } else {
+      for (let j = 0; j < p.length; j++) p[j] = a[j] + (b[j] - a[j]) * f;
+    }
+    this.posAttr.needsUpdate = true;
+
+    const heroW = Math.max(0, 1 - seg);
+    this.group.rotation.z += 0.0022 * heroW + 0.0004;
+    this.tiltY += (this.mx * 0.087 - this.tiltY) * 0.04;
+    this.tiltX += (this.my * 0.087 - this.tiltX) * 0.04;
+    this.group.rotation.y = this.tiltY;
+    this.group.rotation.x = this.tiltX;
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  initScroll() {
+    const g = window.gsap, ST = window.ScrollTrigger;
+    const map = [['#top', 0], ['#ems', 1], ['#hizmetler', 2], ['#kapasite', 3], ['#cift', 3], ['#studyo', 3.4], ['#randevu', 4]];
+    if (!this.reduced) {
+      map.forEach(([sel, idx]) => {
+        if (!document.querySelector(sel)) return;
+        ST.create({
+          trigger: sel, start: 'top 62%', end: 'bottom 38%',
+          onEnter: () => { this.target = idx; },
+          onEnterBack: () => { this.target = idx; }
+        });
+      });
+      g.utils.toArray('[data-reveal]').forEach(el => {
+        g.from(el, { y: 26, opacity: 0, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+      });
+      g.utils.toArray('[data-bar]').forEach(el => {
+        g.from(el, { scaleX: 0, transformOrigin: 'left center', duration: 1.1, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 92%' } });
+      });
+      if (document.querySelector('[data-tile]')) {
+        g.from('[data-tile]', { opacity: 0, y: 12, duration: 0.4, stagger: 0.045, ease: 'power2.out', scrollTrigger: { trigger: '#kapasite', start: 'top 68%' } });
+      }
+    }
+  }
+
+  renderVals() {
+    const open = this.state.menuOpen;
+    return {
+      menuOpen: open,
+      menuClosed: !open,
+      menuMax: open ? '380px' : '0px',
+      menuOpacity: open ? 1 : 0,
+      toggleMenu: () => this.setState(s => ({ menuOpen: !s.menuOpen })),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      lightboxOpen: !!this.state.lightboxSrc,
+      lightboxImg: this.state.lightboxSrc ? React.createElement('img', { src: this.state.lightboxSrc, alt: 'Stüdyo görseli — büyük görünüm', style: { maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '12px', display: 'block' } }) : null,
+      openLightbox: (e) => this.setState({ lightboxSrc: e.currentTarget.getAttribute('src') }),
+      keyLightbox: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.setState({ lightboxSrc: e.currentTarget.getAttribute('src') }); } },
+      closeLightbox: () => this.setState({ lightboxSrc: null }),
+      igFeed: this.buildIgFeed()
+    };
+  }
+}
+</script>
+</body>
+</html>
