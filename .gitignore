@@ -1,0 +1,22 @@
+# Vercel CLI bağlantı ve önbellek dosyaları
+.vercel/
+.vercel
+
+# Ortam değişkenleri — asla depoya girmez
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+
+# Editör / geçici
+*.swp
+*~
+.idea/
+.vscode/
+
+# Bağımlılıklar ve derleme çıktıları (ileride backend eklendiğinde)
+node_modules/
+dist/
+.next/
