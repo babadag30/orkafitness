@@ -10,6 +10,7 @@ export * from './core/result.mjs';
 export * from './core/time.mjs';
 
 export { DEFAULT_POLICY, withPolicy } from './config/policy.default.mjs';
+export { DEMO_POLICY, DEMO_PROVISIONAL_NOTES } from './config/policy.demo.mjs';
 
 export { resolveCycle, isWithinCycle, resolveBucket } from './policies/cycle.policy.mjs';
 export {
@@ -21,10 +22,15 @@ export {
   resolveLinkedPartner, validatePartnerLink, endPartnerLink, findActiveLink
 } from './policies/partner.policy.mjs';
 export { validateBookingWindow, validateSlotOpen } from './policies/booking-window.policy.mjs';
-export { validateCancellation, buildCancellationPlan } from './policies/cancellation.policy.mjs';
+export {
+  validateCancellation, buildCancellationPlan,
+  convertCoupleToSingle, recordLateCancel
+} from './policies/cancellation.policy.mjs';
+export { slotsForDate, isOpenOn, hoursForDate, bookableDays, minToHHMM } from './policies/schedule.policy.mjs';
 
 export { createEntry, projectEntitlement, bucketUsageFor, cancellationsUsed } from './ledger/ledger.mjs';
 export { computeOccupancy, hasMemberConflict, isExclusive, occupiesSeat } from './engine/occupancy.mjs';
 export {
-  canBook, canBookSingleEMS, canBookCoupleEMS, canBookFitness, validateReschedule
+  canBook, canBookSingleEMS, canBookCoupleEMS, canBookFitness,
+  validateReschedule, validateFitnessAccess
 } from './engine/booking.engine.mjs';

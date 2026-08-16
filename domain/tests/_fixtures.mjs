@@ -30,9 +30,14 @@ export function makeWorld({ policy = DEFAULT_POLICY, now = NOW } = {}) {
   const appointments = [];
 
   const world = {
-    /** Üye ekler. Varsayılan aktif. */
+    /** Üye ekler. Varsayılan aktif ve Fitness erişimi açık. */
     member(id, opts = {}) {
-      members.set(id, { id, name: opts.name ?? id, active: opts.active ?? true });
+      members.set(id, {
+        id,
+        name: opts.name ?? id,
+        active: opts.active ?? true,
+        fitnessAccess: opts.fitnessAccess ?? true
+      });
       return world;
     },
 

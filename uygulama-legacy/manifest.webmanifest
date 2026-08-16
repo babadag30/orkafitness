@@ -1,18 +1,23 @@
 {
   "name": "Orka EMS Fitness — Randevu",
   "short_name": "Orka EMS",
-  "description": "EMS ve Fitness randevu uygulaması (işletme sahibi önizlemesi)",
+  "description": "Burdur'da butik EMS ve fitness stüdyosu. 25 dakikalık seanslar için randevu al.",
   "lang": "tr",
   "dir": "ltr",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0A0C10",
-  "theme_color": "#0A0C10",
+  "background_color": "#ffffff",
+  "theme_color": "#faf4f5",
+  "categories": ["health", "fitness", "lifestyle"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Randevu al", "short_name": "Randevu", "url": "./index.html#/service" },
+    { "name": "Randevularım", "short_name": "Randevular", "url": "./index.html#/appointments" }
   ]
 }

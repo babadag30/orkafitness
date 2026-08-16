@@ -86,10 +86,26 @@ export const DEFAULT_POLICY = Object.freeze({
     })
   }),
 
-  /** Seans süresi. Izgara üretimi Phase 2'de sunucuya taşınacak. */
+  /** Seans süresi. */
   session: Object.freeze({
     durationMinutes: 25,
     bufferMinutes: 5
+  }),
+
+  /**
+   * Çalışma saatleri — PROVISIONAL, v0.2'den beri onay bekliyor.
+   * 0 = Pazar. null/eksik gün = kapalı.
+   */
+  schedule: Object.freeze({
+    hours: Object.freeze({
+      0: Object.freeze({ open: '10:00', close: '22:00' }),
+      1: Object.freeze({ open: '08:00', close: '23:30' }),
+      2: Object.freeze({ open: '08:00', close: '23:30' }),
+      3: Object.freeze({ open: '08:00', close: '23:30' }),
+      4: Object.freeze({ open: '08:00', close: '23:30' }),
+      5: Object.freeze({ open: '08:00', close: '23:30' }),
+      6: Object.freeze({ open: '08:00', close: '23:30' })
+    })
   }),
 
   /**

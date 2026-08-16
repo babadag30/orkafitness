@@ -14,6 +14,7 @@ export const ReasonCode = Object.freeze({
 
   // üye / hesap
   MEMBER_INACTIVE: 'MEMBER_INACTIVE',
+  FITNESS_ACCESS_REQUIRED: 'FITNESS_ACCESS_REQUIRED',
 
   // paket ve hak
   PACKAGE_MISSING: 'PACKAGE_MISSING',
@@ -61,6 +62,7 @@ export const ReasonCode = Object.freeze({
  */
 const MEMBER_MESSAGES = Object.freeze({
   [ReasonCode.MEMBER_INACTIVE]: 'Üyeliğin şu anda aktif değil. Stüdyoyla iletişime geç.',
+  [ReasonCode.FITNESS_ACCESS_REQUIRED]: 'Fitness erişimin tanımlı değil. Stüdyoyla iletişime geç.',
   [ReasonCode.PACKAGE_MISSING]: 'Tanımlı bir EMS paketin yok. Stüdyoyla iletişime geç.',
   [ReasonCode.PACKAGE_INACTIVE]: 'EMS paketin aktif değil. Stüdyoyla iletişime geç.',
   [ReasonCode.PACKAGE_PERIOD_MISMATCH]: 'Bu tarih paket dönemin dışında.',
@@ -100,7 +102,8 @@ const OVERRIDABLE = Object.freeze(new Set([
   ReasonCode.BOOKING_TOO_LATE,
   ReasonCode.CANCEL_TOO_LATE,
   ReasonCode.CANCEL_ALLOWANCE_EXHAUSTED,
-  ReasonCode.PACKAGE_PERIOD_MISMATCH
+  ReasonCode.PACKAGE_PERIOD_MISMATCH,
+  ReasonCode.FITNESS_ACCESS_REQUIRED
 ]));
 
 /**

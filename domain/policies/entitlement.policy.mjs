@@ -21,7 +21,7 @@ import { projectEntitlement, bucketUsageFor } from '../ledger/ledger.mjs';
  * @param {number|string|Date} p.sessionStartsAt
  * @param {object} p.policy
  */
-export function validateMemberEntitlement({ member, memberPackage, ledger = [], sessionStartsAt, policy }) {
+export function validateMemberEntitlement({ member, memberPackage, ledger = [], sessionStartsAt, policy, excludeAppointmentId = null }) {
   if (!member || member.active !== true) {
     return deny(ReasonCode.MEMBER_INACTIVE, {
       internalReason: `Üye pasif (member=${member?.id ?? '?'})`,
@@ -60,7 +60,7 @@ export function validateMemberEntitlement({ member, memberPackage, ledger = [], 
     });
   }
 
-  const projection = projectEntitlement({ ledger, memberPackage, policy });
+  const projection = projectEntitlement({ ledger, memberPackage, policy, excludeAppointmentId });
   if (projection.remaining <= 0) {
     return deny(ReasonCode.PACKAGE_EXHAUSTED, {
       internalReason: `Hak kalmadı (kalan=${projection.remaining})`,
@@ -73,7 +73,7 @@ export function validateMemberEntitlement({ member, memberPackage, ledger = [], 
     });
   }
 
-  const { bucket, used } = bucketUsageFor({ ledger, memberPackage, sessionStartsAt, policy });
+  const { bucket, used } = bucketUsageFor({ ledger, memberPackage, sessionStartsAt, policy, excludeAppointmentId });
   if (used >= policy.entitlement.maxPerBucket) {
     return deny(ReasonCode.WEEKLY_LIMIT_REACHED, {
       internalReason: `Kova dolu (${used}/${policy.entitlement.maxPerBucket}, bucket=${bucket.key})`,

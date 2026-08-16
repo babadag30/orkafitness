@@ -121,17 +121,121 @@ export function validateCancellation({ appointment, requestedByMemberId, actor =
     }
   }
 
+  // İptal hakkının kimden düşeceği politikadan gelir (v0.5 §13 sorusu 2).
+  const chargeAllowanceTo = isCouple && policy.cancellation.couple.allowanceCharge === 'BOTH_MEMBERS'
+    ? (appointment.participants ?? []).map(p => p.memberId)
+    : [requestedByMemberId];
+
   return allow({
-    scope: 'PARTICIPANT',
+    scope: isCouple && policy.cancellation.couple.scope === 'CANCEL_WHOLE'
+      ? 'WHOLE_APPOINTMENT'
+      : 'PARTICIPANT',
     hoursLeft,
-    plan: buildCancellationPlan({
-      appointment, actor, ctx,
-      chargeAllowanceTo: [requestedByMemberId]
-    })
+    plan: buildCancellationPlan({ appointment, actor, ctx, chargeAllowanceTo })
   });
 }
 
 const get = (mapOrObj, key) => (mapOrObj instanceof Map ? mapOrObj.get(key) : mapOrObj?.[key]);
+
+/**
+ * Yönetici, çift seansını tek kişilik EMS seansına çevirir. v0.5 §13 sorusu 3.
+ * Kalan üye randevusunu korur; çıkarılan üyenin hakkı iade edilir ve
+ * randevu münhasırlığını kaybeder — böylece saat normal kapasiteye geri döner.
+ *
+ * Politika bunu açıkça izinli hâle getirmediyse motor tahmin yürütmez.
+ */
+export function convertCoupleToSingle({ appointment, removeMemberId, ctx }) {
+  const { policy } = ctx;
+
+  if (policy.cancellation.couple.adminCanConvertToSingle !== true) {
+    return unresolved('Yöneticinin çift seansını tek kişilik seansa çevirebilmesi', {
+      adminMessage: 'Çifti tek kişilik seansa çevirme davranışı henüz karara bağlanmadı.',
+      metadata: { appointmentId: appointment.id ?? null }
+    });
+  }
+
+  if (appointment.bookingMode !== BookingMode.COUPLE) {
+    return deny(ReasonCode.ALREADY_CANCELLED, {
+      internalReason: 'Randevu zaten çift değil',
+      adminMessage: 'Bu randevu bir çift seansı değil.'
+    });
+  }
+
+  const staying = (appointment.participants ?? []).filter(p => p.memberId !== removeMemberId);
+  const removed = (appointment.participants ?? []).find(p => p.memberId === removeMemberId);
+
+  if (!removed || staying.length !== 1) {
+    return deny(ReasonCode.ALREADY_CANCELLED, {
+      internalReason: `Çıkarılacak katılımcı bulunamadı: ${removeMemberId}`,
+      adminMessage: 'Çıkarılacak üye bu randevuda değil.'
+    });
+  }
+
+  return allow({
+    removedMemberId: removeMemberId,
+    remainingMemberId: staying[0].memberId,
+    plan: {
+      appointment: {
+        id: appointment.id ?? null,
+        bookingMode: BookingMode.SINGLE,
+        // Münhasırlık kalkar → saat normal kapasite kurallarına döner
+        exclusiveStudio: false,
+        status: AppointmentStatus.ACTIVE
+      },
+      // Çıkarılan üye iptal edilmiş sayılır, kalan üye randevusunu korur
+      participants: [{ memberId: removeMemberId, attendanceStatus: AttendanceStatus.ADMIN_CANCELLED }],
+      removeParticipants: [removeMemberId],
+      ledgerEntries: [createEntry({
+        type: LedgerEventType.ADMIN_CANCEL_RELEASED,
+        memberId: removeMemberId,
+        memberPackageId: get(ctx.packages, removeMemberId)?.id ?? null,
+        appointmentId: appointment.id ?? null,
+        sessionStartsAt: toEpoch(appointment.startsAt),
+        recordedAt: toEpoch(ctx.now),
+        actorId: ctx.actorId ?? null,
+        reason: 'Çift seansı tek kişiliğe çevrildi'
+      })],
+      allowanceChargedTo: []
+    }
+  });
+}
+
+/**
+ * Geç iptal. Yönetici kaydeder. v0.5 §13 + demo politikası:
+ * hak YANMAYA devam eder (delta 0), ama katılımcı fiziksel yeri bırakır.
+ * Kredi tüketimi ile doluluk bilinçli olarak ayrı iki kavram.
+ */
+export function recordLateCancel({ appointment, memberId, ctx }) {
+  const participant = (appointment.participants ?? []).find(p => p.memberId === memberId);
+  if (!participant) {
+    return deny(ReasonCode.ALREADY_CANCELLED, {
+      internalReason: `Katılımcı bulunamadı: ${memberId}`,
+      adminMessage: 'Bu üye randevuda değil.'
+    });
+  }
+
+  const isEMS = appointment.serviceType === ServiceType.EMS;
+  return allow({
+    entitlementRestored: false,
+    occupancyReleased: ctx.policy.occupancy.releasingStatuses.includes(AttendanceStatus.LATE_CANCEL),
+    plan: {
+      appointment: { id: appointment.id ?? null },
+      participants: [{ memberId, attendanceStatus: AttendanceStatus.LATE_CANCEL }],
+      // delta 0 — ayrılmış hak kesinleşir, iade edilmez
+      ledgerEntries: isEMS ? [createEntry({
+        type: LedgerEventType.LATE_CANCEL_CONSUMED,
+        memberId,
+        memberPackageId: get(ctx.packages, memberId)?.id ?? null,
+        appointmentId: appointment.id ?? null,
+        sessionStartsAt: toEpoch(appointment.startsAt),
+        recordedAt: toEpoch(ctx.now),
+        actorId: ctx.actorId ?? null,
+        reason: 'Geç iptal'
+      })] : [],
+      allowanceChargedTo: []
+    }
+  });
+}
 
 /**
  * İptalin yazma planı. Motor uygulamaz; kalıcılık katmanı tek transaction'da uygular.

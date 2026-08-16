@@ -4,18 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Orka EMS Fitness — Randevu</title>
-<meta name="description" content="Orka EMS Fitness randevu uygulaması. 25 dakikalık EMS ve Fitness seansları, Burdur.">
-<meta name="theme-color" content="#faf4f5">
+<meta name="description" content="Orka EMS Fitness randevu uygulaması. EMS ve Fitness seansları, Burdur.">
+<meta name="theme-color" content="#0A0C10">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Orka EMS">
 <meta name="mobile-web-app-capable" content="yes">
-
-<meta property="og:title" content="Orka EMS Fitness — Randevu">
-<meta property="og:description" content="25 dakikalık EMS ve Fitness seansları. Randevunu uygulamadan al.">
-<meta property="og:type" content="website">
-<meta property="og:image" content="icons/icon-512.png">
-<meta property="og:locale" content="tr_TR">
+<meta name="robots" content="noindex">
 
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon-64.png" sizes="64x64">
@@ -23,18 +18,20 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap">
-<link rel="stylesheet" href="css/app.css?v=7">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/app.css?v=demo1">
 </head>
 <body>
 <div id="app" class="app"></div>
 
-<!-- ?v= sürüm damgası: tarayıcı ve servis çalışanı önbelleğinin
-     güncellemeden sonra eski dosyayı vermesini engeller. Kod değişince artır. -->
-<script src="js/rules.js?v=7"></script>
-<script src="js/store.js?v=7"></script>
-<script src="js/screens.js?v=7"></script>
-<script src="js/admin.js?v=7"></script>
-<script src="js/app.js?v=7"></script>
+<!-- Domain motoru depo kökünden yüklenir (/domain/). Kopya yok, derleme yok:
+     iş kuralları tek yerde kalır ve framework bağımsızlığı korunur. -->
+<script type="module" src="js/main.mjs?v=demo1"></script>
+
+<noscript>
+  <p style="padding:24px;color:#EEF1F6;font-family:sans-serif">
+    Bu uygulama JavaScript gerektirir.
+  </p>
+</noscript>
 </body>
 </html>

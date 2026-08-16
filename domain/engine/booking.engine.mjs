@@ -171,7 +171,8 @@ export function canBookSingleEMS({ memberId, ctx }) {
     memberPackage: packageOf(ctx, memberId),
     ledger: ledgerOf(ctx, memberId),
     sessionStartsAt: ctx.slot.startsAt,
-    policy: ctx.policy
+    policy: ctx.policy,
+    excludeAppointmentId: ctx.excludeAppointmentId ?? null
   });
   if (!entitlement.allowed) return entitlement;
 
@@ -242,7 +243,8 @@ export function canBookCoupleEMS({ initiatorMemberId, ctx }) {
       memberPackage: packageOf(ctx, p.memberId),
       ledger: ledgerOf(ctx, p.memberId),
       sessionStartsAt: ctx.slot.startsAt,
-      policy: ctx.policy
+      policy: ctx.policy,
+      excludeAppointmentId: ctx.excludeAppointmentId ?? null
     });
     if (!r.allowed) {
       // Partner takılırsa sebep, üyeye "partnerin uygun değil" diye döner;
@@ -276,11 +278,28 @@ export function canBookCoupleEMS({ initiatorMemberId, ctx }) {
 /* Fitness — EMS hak sisteminden tamamen bağımsız                       */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Fitness erişimi. EMS'in paket hakkına karşılık Fitness'ta üyenin
+ * basit bir yetkisi var: fitnessAccess. Ücret modeli karara bağlanmadığı için
+ * (v0.5 §25) şimdilik tek bir bayrak — model netleşince burası genişler.
+ */
+export function validateFitnessAccess(member) {
+  if (member?.fitnessAccess === true) return allow();
+  return deny(ReasonCode.FITNESS_ACCESS_REQUIRED, {
+    internalReason: `Üyenin Fitness erişimi yok (member=${member?.id ?? '?'})`,
+    adminMessage: `${member?.name ?? member?.id}: Fitness erişimi tanımlı değil.`,
+    metadata: { memberId: member?.id ?? null }
+  });
+}
+
 export function canBookFitness({ memberId, ctx }) {
   const occupancy = occupancyOf(ctx);
 
   const pre = preflight({ ctx, memberId, occupancy });
   if (!pre.allowed) return pre;
+
+  const access = validateFitnessAccess(memberOf(ctx, memberId));
+  if (!access.allowed) return access;
 
   const capacity = validateStudioCapacity({
     occupancy,

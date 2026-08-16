@@ -1,29 +1,22 @@
-/* Orka EMS Fitness — service worker
-   Uygulama kabuğunu önbelleğe alır, böylece uygulama çevrimdışı da açılır.
-   Randevu verisi localStorage'da tutulduğu için çevrimdışı görüntüleme çalışır. */
+/* Orka EMS Fitness — servis çalışanı (işletme sahibi önizlemesi)
 
-const VERSION = 'orka-v7';
+   Sürüm bilerek "demo" ön ekli: önizleme kendi kaynağında (preview URL)
+   çalışır ve üretimdeki orka-v7 önbelleğine hiçbir şekilde dokunmaz. */
+
+const VERSION = 'orka-demo-1';
 const SHELL = [
-  './',
-  './index.html',
-  './manifest.webmanifest',
-  './css/app.css?v=7',
-  './js/rules.js?v=7',
-  './js/store.js?v=7',
-  './js/screens.js?v=7',
-  './js/admin.js?v=7',
-  './js/app.js?v=7',
+  './', './index.html', './manifest.webmanifest',
+  './css/app.css?v=demo1',
+  './js/main.mjs?v=demo1',
   './assets/logo.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png',
-  './icons/favicon-64.png'
+  './icons/icon-192.png', './icons/icon-512.png',
+  './icons/apple-touch-icon.png', './icons/favicon-64.png'
 ];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(VERSION)
-      .then(c => c.addAll(SHELL))
+      .then(c => c.addAll(SHELL).catch(() => { /* kısmi önbellek yeterli */ }))
       .then(() => self.skipWaiting())
   );
 });
@@ -39,35 +32,26 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
-
   const url = new URL(req.url);
 
-  // Sayfa gezinmeleri: önce ağ, kopmuşsa önbellekteki kabuk
   if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req).catch(() => caches.match('./index.html'))
-    );
+    e.respondWith(fetch(req).catch(() => caches.match('./index.html')));
     return;
   }
 
-  // Google Fonts: önbellekten ver, arka planda tazele
   if (url.hostname.endsWith('googleapis.com') || url.hostname.endsWith('gstatic.com')) {
-    e.respondWith(
-      caches.open(VERSION).then(async (cache) => {
-        const hit = await cache.match(req);
-        const net = fetch(req).then(res => {
-          if (res && res.status === 200) cache.put(req, res.clone());
-          return res;
-        }).catch(() => hit);
-        return hit || net;
-      })
-    );
+    e.respondWith(caches.open(VERSION).then(async (cache) => {
+      const hit = await cache.match(req);
+      const net = fetch(req).then(res => {
+        if (res && res.status === 200) cache.put(req, res.clone());
+        return res;
+      }).catch(() => hit);
+      return hit || net;
+    }));
     return;
   }
 
-  // Kendi dosyalarımız: önce ağ, kopmuşsa önbellek.
-  // Cache-first bilerek kullanılmadı — kod güncellemelerinin kullanıcıya
-  // ulaşması sürüm numarası bumplanmasına bağlı kalıyordu.
+  // Kendi dosyalarımız — domain/ modülleri dahil: önce ağ, kopmuşsa önbellek.
   if (url.origin === location.origin) {
     e.respondWith(
       fetch(req).then(res => {

@@ -57,7 +57,7 @@ export function createEntry(p) {
  *   reservedCount:number, bucketUsage:Map<string,number>, entryCount:number
  * }}
  */
-export function projectEntitlement({ ledger = [], memberPackage, policy }) {
+export function projectEntitlement({ ledger = [], memberPackage, policy, excludeAppointmentId = null }) {
   const total = memberPackage?.totalCredits ?? policy.entitlement.totalCredits;
 
   let deltaSum = 0;
@@ -66,6 +66,9 @@ export function projectEntitlement({ ledger = [], memberPackage, policy }) {
 
   for (const e of ledger) {
     if (memberPackage && e.memberPackageId !== memberPackage.id) continue;
+    // Taşıma sırasında randevunun KENDİ kayıtları sayılmaz; aksi hâlde
+    // randevu kendi hakkını tüketmiş gibi görünür ve taşınamaz.
+    if (excludeAppointmentId && e.appointmentId === excludeAppointmentId) continue;
 
     deltaSum += e.delta;
     if (e.type === LedgerEventType.BOOKING_RESERVED) reservedCount += 1;
@@ -92,8 +95,8 @@ export function projectEntitlement({ ledger = [], memberPackage, policy }) {
 }
 
 /** Belirli bir seans tarihinin düştüğü kovada kaç kullanım var. */
-export function bucketUsageFor({ ledger, memberPackage, sessionStartsAt, policy }) {
-  const projection = projectEntitlement({ ledger, memberPackage, policy });
+export function bucketUsageFor({ ledger, memberPackage, sessionStartsAt, policy, excludeAppointmentId = null }) {
+  const projection = projectEntitlement({ ledger, memberPackage, policy, excludeAppointmentId });
   const bucket = resolveBucket(memberPackage, sessionStartsAt, policy);
   return {
     bucket,
