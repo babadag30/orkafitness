@@ -630,7 +630,8 @@ export function profile() {
 
         <div class="demofoot">
           Owner Review Preview · Demo Data<br>
-          Veriler yalnızca bu tarayıcıda tutulur.
+          Demo verileri Supabase üzerinde paylaşılır ve bağlı cihazlar arasında
+          canlı senkronize edilir. Production veritabanı değildir.
           <button class="btn btn--ghost compact" style="margin-top:10px" data-act="resetDemo">DEMOYU SIFIRLA</button>
         </div>
       </div>`,

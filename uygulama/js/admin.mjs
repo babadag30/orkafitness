@@ -654,6 +654,60 @@ function memberSheet(id) {
 /* Ayarlar — demo notları                                               */
 /* ------------------------------------------------------------------ */
 
+const GUN_KIS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+/** Bugünden başlayarak istenen haftagününe düşen ilk tarih. */
+function nextDayOfWeek(dow) {
+  const t0 = startOfDay(Date.now());
+  for (let i = 0; i < 7; i++) if (dowOf(t0 + i * DAY) === dow) return t0 + i * DAY;
+  return t0;
+}
+
+/**
+ * Çalışma saatleri POLİTİKADAN okunur, elle yazılmaz.
+ * Aynı saatlere sahip ardışık günler tek satırda toplanır (Pzt – Cmt gibi);
+ * politikada bir gün değişirse burada kendiliğinden ayrışır.
+ */
+function workingHourRows() {
+  const hours = A.POLICY.schedule.hours;
+  const groups = [];
+  for (const d of [1, 2, 3, 4, 5, 6, 0]) {        // hafta Pazartesi başlar
+    const h = hours[d];
+    const key = h ? `${h.open}-${h.close}` : 'closed';
+    const last = groups.at(-1);
+    if (last && last.key === key) last.days.push(d);
+    else groups.push({ key, days: [d], h });
+  }
+  return groups.map(g => ({
+    label: g.days.length === 1
+      ? GUN_KIS[g.days[0]]
+      : `${GUN_KIS[g.days[0]]} – ${GUN_KIS[g.days.at(-1)]}`,
+    value: g.h ? `${g.h.open} – ${g.h.close}` : 'Kapalı'
+  }));
+}
+
+/**
+ * Takvimde görünen SON SATIR, yani son seansın başlangıcı.
+ * Kapanış saatiyle karıştırılmasın diye ayrıca gösterilir ve motordan
+ * alınır — ayarlar ekranı ile takvim böylece asla ayrışamaz.
+ */
+function lastSessionSummary() {
+  const seen = new Map();
+  for (const d of [1, 2, 3, 4, 5, 6, 0]) {
+    const slots = A.slotsOfDay(nextDayOfWeek(d));
+    if (!slots.length) continue;
+    const t = fmt.time(slots.at(-1));
+    if (!seen.has(t)) seen.set(t, []);
+    seen.get(t).push(d);
+  }
+  return [...seen.entries()].map(([t, days]) => {
+    const label = days.length === 1
+      ? GUN_KIS[days[0]]
+      : `${GUN_KIS[days[0]]}–${GUN_KIS[days.at(-1)]}`;
+    return `${label} ${t}`;
+  }).join(' · ');
+}
+
 export function adminSettings() {
   const p = A.POLICY;
   const row = (k, v) => `<div class="row between"><span class="small muted">${esc(k)}</span><b>${esc(v)}</b></div>`;
@@ -696,16 +750,24 @@ export function adminSettings() {
             <p class="small">Aşağıdakiler işletme sahibi onayı bekliyor. Nihai karar değildir.</p>
             ${DEMO_PROVISIONAL_NOTES.map(n => `<p class="small">· ${esc(n)}</p>`).join('')}
           </div>
-          <div class="card">
-            <p class="eyebrow">ÇALIŞMA SAATLERİ</p>
-            ${row('Pzt – Cmt', '08:00 – 23:30')}
-            ${row('Pazar', '10:00 – 22:00')}
+          <div class="card warn">
+            <div class="row between">
+              <p class="eyebrow" style="color:var(--warn)">ÇALIŞMA SAATLERİ</p>
+              ${pill('Geçici', 'warn')}
+            </div>
+            ${workingHourRows().map(h => row(h.label, h.value)).join('')}
+            ${row('Son seans', lastSessionSummary())}
             ${row('Seans', p.session.durationMinutes + ' dk + ' + p.session.bufferMinutes + ' dk tampon')}
+            <p class="tiny muted">Kapanış saati stüdyonun kapandığı andır; son seans ondan
+            önce başlayıp biter. Takvimdeki son satır bu yüzden kapanıştan erkendir.</p>
+            <p class="tiny" style="color:var(--warn)">İşletme sahibi onayı bekliyor — nihai karar değildir.</p>
           </div>
           <div class="card">
             <p class="eyebrow">VERİ</p>
             <p class="small">Owner Review Preview · Demo Data</p>
-            <p class="tiny muted">Veriler yalnızca bu tarayıcıda tutulur. Sunucu ve veritabanı yok.</p>
+            <p class="tiny muted">Demo verileri Supabase üzerinde paylaşılır ve bağlı cihazlar
+            arasında canlı senkronize edilir; bildirimler sunucu tarafında üretilir.
+            Bu altyapı bir production veritabanı değildir.</p>
             <button class="btn btn--ghost compact" data-act="resetDemo" style="margin-top:8px">DEMOYU SIFIRLA</button>
           </div>
         </div>
