@@ -5,17 +5,19 @@
 :root {
   color-scheme: dark;
 
-  --bg:        #0A0C10;
-  --bg-soft:   #0F1218;
-  --surface:   #151922;
-  --surface-2: #1C212C;
-  --surface-3: #232936;
-  --border:    #272E3B;
-  --border-soft: #1E2430;
+  /* Katmanlar bilinçli olarak yakın-siyahtan uzaklaştırıldı: sayfa → takvim →
+     kart sırasıyla açılır, böylece derinlik parlaklıkla değil katmanla anlatılır. */
+  --bg:        #12151C;   /* sayfa      */
+  --bg-soft:   #171B23;   /* takvim yüzeyi */
+  --surface:   #1C212B;   /* kart       */
+  --surface-2: #232935;   /* yükseltilmiş kart */
+  --surface-3: #2C3341;   /* etkileşim  */
+  --border:    #333B4A;
+  --border-soft: #272E3A;
 
-  --text:      #EEF1F6;
-  --text-2:    #A8B2C1;
-  --muted:     #6C7787;
+  --text:      #EDF0F5;
+  --text-2:    #AEB7C4;
+  --muted:     #78828F;
 
   --accent:    #3B82F6;
   --accent-2:  #22D3EE;
@@ -77,9 +79,8 @@ body {
   position: fixed;
   inset: 0 0 auto 0;
   height: 420px;
-  background:
-    radial-gradient(120% 100% at 50% -20%, rgba(59,130,246,.16), transparent 62%),
-    radial-gradient(90% 70% at 88% 4%, rgba(34,211,238,.09), transparent 60%);
+  /* Tek, çok yumuşak ışık. Eskiden iki katmanlı neon parıltı vardı. */
+  background: radial-gradient(110% 90% at 50% -25%, rgba(59,130,246,.07), transparent 65%);
   pointer-events: none;
   z-index: 0;
 }
@@ -161,8 +162,8 @@ p  { color: var(--text-2); }
 /* Öne çıkan kart — sıradaki randevu */
 .hero {
   position: relative; overflow: hidden;
-  background: linear-gradient(152deg, #1B2A4A 0%, #16202F 46%, var(--surface) 100%);
-  border: 1px solid rgba(59,130,246,.28);
+  background: linear-gradient(150deg, #212C42 0%, #1D2430 52%, var(--surface) 100%);
+  border: 1px solid rgba(96,140,220,.22);
   border-radius: var(--r-xl);
   padding: var(--sp-5);
   display: flex; flex-direction: column; gap: var(--sp-3);
@@ -170,7 +171,7 @@ p  { color: var(--text-2); }
 .hero::after {
   content: ''; position: absolute; right: -60px; top: -70px;
   width: 210px; height: 210px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(34,211,238,.20), transparent 68%);
+  background: radial-gradient(circle, rgba(96,165,250,.10), transparent 70%);
 }
 .hero > * { position: relative; z-index: 1; }
 .hero .when { font-size: 30px; font-weight: 700; letter-spacing: -.03em; }
@@ -187,7 +188,7 @@ p  { color: var(--text-2); }
 .btn:active { transform: scale(.985); }
 .btn--primary {
   background: linear-gradient(135deg, var(--accent), #2563EB);
-  color: #fff; box-shadow: 0 6px 20px rgba(59,130,246,.30);
+  color: #fff; box-shadow: 0 2px 10px rgba(37,99,235,.22);
 }
 .btn--primary:hover { filter: brightness(1.08); }
 .btn--secondary { background: var(--surface-2); color: var(--text); border-color: var(--border); }
@@ -260,7 +261,7 @@ p  { color: var(--text-2); }
 .day.on {
   background: linear-gradient(150deg, var(--accent), #2563EB);
   border-color: transparent; color: rgba(255,255,255,.85);
-  box-shadow: 0 6px 18px rgba(59,130,246,.32);
+  box-shadow: 0 2px 10px rgba(37,99,235,.24);
 }
 .day.on b { color: #fff; }
 .day.off { opacity: .32; pointer-events: none; }
@@ -281,7 +282,7 @@ p  { color: var(--text-2); }
 .slot.on {
   background: linear-gradient(150deg, var(--accent), #2563EB);
   border-color: transparent; color: #fff;
-  box-shadow: 0 6px 18px rgba(59,130,246,.32);
+  box-shadow: 0 2px 10px rgba(37,99,235,.24);
 }
 .slot.on small { color: rgba(255,255,255,.8); }
 .slot.off { opacity: .3; cursor: not-allowed; }
@@ -314,8 +315,8 @@ p  { color: var(--text-2); }
   display: grid; grid-template-columns: repeat(4, 1fr);
   height: calc(var(--tab-h) + var(--safe-b));
   padding-bottom: var(--safe-b);
-  background: rgba(12,15,20,.86);
-  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  background: rgba(18,21,28,.92);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--border-soft);
 }
 .tab {
@@ -328,7 +329,7 @@ p  { color: var(--text-2); }
 .tab .dot {
   position: absolute; top: 9px; right: calc(50% - 17px);
   width: 7px; height: 7px; border-radius: 50%; background: var(--bad);
-  border: 2px solid #0C0F14;
+  border: 2px solid #12151C;
 }
 
 /* ---------- bildirim ---------- */
@@ -380,7 +381,7 @@ p  { color: var(--text-2); }
   position: sticky; top: 0; z-index: 15;
   display: flex; align-items: center; gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-5);
-  background: rgba(12,15,20,.9); backdrop-filter: blur(16px);
+  background: rgba(20,24,31,.94); backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-soft);
   margin: calc(var(--sp-5) * -1) calc(var(--sp-5) * -1) 0;
   flex-wrap: wrap;
@@ -394,7 +395,10 @@ p  { color: var(--text-2); }
 .adminbar nav a:hover { background: var(--surface-2); color: var(--text); }
 .adminbar nav a.on { background: var(--surface-3); color: var(--text); }
 
-.weekgrid { overflow-x: auto; border: 1px solid var(--border-soft); border-radius: var(--r); }
+.weekgrid {
+  overflow-x: auto; border: 1px solid var(--border-soft);
+  border-radius: var(--r); background: var(--bg-soft);
+}
 .weekgrid table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 12px; }
 .weekgrid th, .weekgrid td {
   border-bottom: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft);
@@ -405,46 +409,52 @@ p  { color: var(--text-2); }
   padding: 9px 6px; font-size: 11px; font-weight: 650; color: var(--text-2);
   text-align: center; letter-spacing: .03em;
 }
-.weekgrid thead th.today { color: var(--accent-2); }
+.weekgrid thead th.today { color: var(--accent); }
+.weekgrid thead th.today span { color: var(--accent); }
 .weekgrid thead th span { display: block; font-size: 16px; color: var(--text); font-weight: 700; }
 .weekgrid tbody th {
   width: 54px; background: var(--bg-soft); color: var(--muted);
   font-size: 11px; font-weight: 600; padding: 6px; text-align: center;
   font-variant-numeric: tabular-nums;
 }
-.weekgrid td.dayoff { background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,.02) 5px, rgba(255,255,255,.02) 10px); }
-.weekgrid td.now { box-shadow: inset 0 2px 0 var(--accent-2); }
+.weekgrid td.dayoff { background: rgba(0,0,0,.16); }
+.weekgrid td.now { box-shadow: inset 0 2px 0 var(--accent); }
 
 .cell { min-height: 42px; padding: 3px; display: flex; flex-direction: column; gap: 2px; }
 .cell.drop { background: rgba(59,130,246,.14); outline: 1px dashed var(--accent); outline-offset: -2px; }
 .cell.nodrop { background: rgba(248,113,113,.10); outline: 1px dashed var(--bad); outline-offset: -2px; }
 
 .appt {
-  border-radius: 7px; padding: 5px 7px; cursor: grab;
-  background: var(--surface-2); border-left: 3px solid var(--accent);
+  border-radius: 8px; padding: 6px 8px; cursor: grab;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid #5B8DEF;
+  box-shadow: 0 1px 2px rgba(0,0,0,.28);
   font-size: 11px; line-height: 1.35; text-align: left; width: 100%;
   color: inherit; font-family: inherit;
-  transition: transform .1s, opacity .15s;
+  transition: transform .1s, opacity .15s, background .15s;
 }
-.appt:hover { background: var(--surface-3); }
+.appt:hover { background: var(--surface-3); border-color: var(--border); }
 .appt:active { cursor: grabbing; }
-.appt b { display: block; font-weight: 650; font-size: 11.5px; }
-.appt em { font-style: normal; color: var(--muted); font-size: 10px; letter-spacing: .03em; }
-.appt.fitness { border-left-color: var(--accent-2); }
+.appt b { display: block; font-weight: 600; font-size: 12px; color: var(--text); letter-spacing: -.01em; }
+.appt em { font-style: normal; color: var(--text-2); font-size: 10px; letter-spacing: .02em; }
+.appt.fitness { border-left-color: #4BA8B8; }
+/* Çift seansı özel kalmalı ama bağırmamalı: sıcak kenar + çok hafif zemin. */
 .appt.couple {
-  border-left-color: var(--warn);
-  background: linear-gradient(100deg, rgba(251,191,36,.14), var(--surface-2) 62%);
+  border-left-color: #C99A4A;
+  background: linear-gradient(100deg, rgba(201,154,74,.10), var(--surface-2) 58%);
 }
 .appt.cut { opacity: .4; border-style: dashed; }
 .appt.past { opacity: .5; }
 .appt.dragging { opacity: .35; }
 
 .emptyslot {
-  border: 1px dashed var(--border); border-radius: 6px;
-  min-height: 34px; cursor: pointer; background: transparent;
+  border: 1px solid transparent; border-radius: 7px;
+  min-height: 34px; cursor: pointer;
+  background: rgba(255,255,255,.022);
   transition: background .12s, border-color .12s;
 }
-.emptyslot:hover { background: var(--surface); border-color: var(--surface-3); }
+.emptyslot:hover { background: rgba(59,130,246,.10); border-color: rgba(59,130,246,.35); }
 
 .ctxmenu {
   position: fixed; z-index: 200; min-width: 190px;
@@ -466,14 +476,9 @@ p  { color: var(--text-2); }
   display: flex; align-items: flex-end; justify-content: center;
   animation: fade .18s;
 }
-.sheet > div {
-  width: 100%; max-width: 460px; max-height: 88dvh; overflow-y: auto;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-xl) var(--r-xl) 0 0;
-  padding: var(--sp-5) var(--sp-5) calc(var(--sp-5) + var(--safe-b));
-  display: flex; flex-direction: column; gap: var(--sp-3);
-  animation: slideup .26s cubic-bezier(.2,.8,.2,1);
-}
+/* Eski tek-parça panel kuralı kaldırıldı: .sheetbox/.sheetbody ikilisi
+   onun yerini aldı. Bıraksaydık max-height:88dvh masaüstü çekmecesinin
+   top+bottom hesabını ezip paneli 19px taşırıyordu. */
 @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes slideup { from { transform: translateY(24px) } to { transform: none } }
 
@@ -527,3 +532,132 @@ p  { color: var(--text-2); }
 }
 .pushcard.on { border-color: rgba(52,211,153,.3); background: rgba(52,211,153,.06); }
 .pushcard.on .ico { background: rgba(52,211,153,.13); color: var(--ok); }
+
+/* ================================================================== */
+/* Yönetim paneli — masaüstünde sağ çekmece, mobilde alt sayfa          */
+/* ================================================================== */
+
+.sheetbox {
+  position: relative;
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.sheetbody {
+  display: flex; flex-direction: column; gap: var(--sp-3);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.sheetclose {
+  position: absolute; z-index: 2; top: 12px; right: 12px;
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--text-2);
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.sheetclose:hover { background: var(--surface-3); color: var(--text); }
+
+/* Panelin altına sabitlenen birincil eylem alanı.
+   Arka plan TAM OPAK: yarı saydam olduğunda altındaki önizleme metni
+   düğmelerin arasından okunuyordu. İçeriğe ayrıca alt boşluk verilir ki
+   son bölüm bu alanın altında sıkışmadan yukarı kaydırılabilsin. */
+.sheetfoot {
+  position: sticky; bottom: 0; z-index: 2;
+  /* Yatayda tam genişlik, altta SIFIR: negatif alt boşluk bırakıldığında
+     kaydırma alanının dibinde 24px açık kalıyor ve arkadaki metin sızıyordu. */
+  margin: var(--sp-3) calc(var(--sp-5) * -1) 0;
+  padding: var(--sp-3) var(--sp-5) calc(var(--sp-4) + var(--safe-b));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -10px 20px -12px rgba(0,0,0,.55);
+  display: flex; flex-direction: column; gap: 8px;
+}
+/* Son içerik bloğu yapışkan alanın altında kalmasın */
+.sheetbody:has(.sheetfoot) > *:nth-last-child(2) { margin-bottom: var(--sp-2); }
+
+/* ---------- mobil / tablet: alt sayfa ---------- */
+@media (max-width: 899px) {
+  .sheet {
+    align-items: flex-end; justify-content: center;
+    background: rgba(6,8,12,.66);
+    backdrop-filter: blur(4px);
+  }
+  .sheetbox {
+    /* Masaüstündeki ile aynı gerekçe: bottom sabitlenir, yükseklik türetilir.
+       Esnek yerleşimle hizalandığında iç dolgular yüzünden 24px taşıyordu. */
+    position: fixed; left: 0; right: 0; bottom: 0;
+    width: 100%; max-width: 520px; margin: 0 auto;
+    max-height: 88dvh;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    border-bottom: none;
+    animation: slideup .26s cubic-bezier(.2,.8,.2,1);
+  }
+  .sheetbody {
+    padding: var(--sp-5) var(--sp-5) calc(var(--sp-5) + var(--safe-b));
+  }
+  .sheetbody:has(.sheetfoot) { padding-bottom: 0; }
+}
+
+/* ---------- masaüstü: sağ çekmece ---------- */
+@media (min-width: 900px) {
+  /* Takvim görünür kalır; çekmece üstüne değil yanına oturur. */
+  .sheet {
+    align-items: stretch; justify-content: flex-end;
+    background: rgba(6,8,12,.42);
+    backdrop-filter: none;
+  }
+  .sheetbox {
+    /* Doğrudan konumlandırma: top + bottom birlikte verildiği için yükseklik
+       görünüm alanından TÜRETİLİR. Hesaplanan yükseklik yok, sabit piksel yok
+       → tarayıcı çubuğu/dock ekranı kısaltsa bile taşma matematiksel olarak
+       imkânsız. (Esnek yerleşimle konumlandırıldığında 19px taşıyordu.) */
+    position: fixed;
+    top: var(--admin-head, 56px);
+    bottom: 0;
+    right: 0;
+    width: min(460px, 92vw);
+    border-radius: var(--r-lg) 0 0 0;
+    border-right: none;
+    box-shadow: -18px 0 44px rgba(0,0,0,.42);
+    animation: slidein .24s cubic-bezier(.2,.8,.2,1);
+  }
+  .sheetbody {
+    flex: 1;
+    padding: var(--sp-5) var(--sp-5) var(--sp-5);
+  }
+  /* Alt eylem alanı varsa dip dolgusunu o üstlenir */
+  .sheetbody:has(.sheetfoot) { padding-bottom: 0; }
+  .sheetbody > .row:first-child { padding-right: 40px; }  /* kapatma düğmesine yer */
+}
+
+@keyframes slidein { from { transform: translateX(24px); opacity: .6 } to { transform: none; opacity: 1 } }
+
+/* Kısa masaüstü ekranlarda başlık da kaymasın */
+@media (min-width: 900px) and (max-height: 720px) {
+  .sheetbody { padding-top: var(--sp-4); }
+  .sheetfoot { padding-bottom: var(--sp-3); }
+}
+
+/* ---------- bildirim önizlemesi (telefon görünümü) ---------- */
+.notifpreview {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: rgba(255,255,255,.055);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 11px 13px;
+}
+.notifpreview img { width: 26px; height: 26px; border-radius: 7px; flex: 0 0 26px; }
+.notifpreview .app {
+  display: block; font-size: 10.5px; font-weight: 600;
+  letter-spacing: .04em; text-transform: uppercase; color: var(--muted);
+}
+.notifpreview b {
+  display: block; font-size: 13.5px; font-weight: 600;
+  color: var(--text); margin-top: 2px; word-break: break-word;
+}
+.notifpreview p {
+  font-size: 12.5px; color: var(--text-2); margin-top: 1px;
+  word-break: break-word; white-space: pre-wrap;
+}
+
+textarea { resize: vertical; min-height: 84px; font-family: var(--font); line-height: 1.5; }

@@ -11,6 +11,7 @@ import {
 } from '../../domain/index.mjs';
 import * as Store from './store.mjs';
 import * as A from './adapter.mjs';
+import * as AP from './admin-push.mjs';
 import { esc, fmt, icon, pill, toast, sheet, closeSheet, startOfDay } from './ui.mjs';
 
 const DAY = 86_400_000;
@@ -476,11 +477,15 @@ function memberSheet(id) {
         <span class="muted">${esc(fmt.date(p.paidAt))} · ${esc(METOT[p.method] ?? p.method)}${p.note ? ` · ${esc(p.note)}` : ''}</span>
         <b>${esc(fmt.money(p.amount))}</b></div>`).join('')}</div>` : ''}
 
-    <button class="btn btn--ghost" data-act="closeSheet">KAPAT</button>
+    <div class="sheetfoot">
+      <button class="btn btn--primary" data-act="openNotify">${icon.bell} BİLDİRİM GÖNDER</button>
+      <button class="btn btn--ghost" data-act="closeSheet">KAPAT</button>
+    </div>
   `, (root) => {
     root.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-act]');
       if (!btn) return;
+      if (btn.dataset.act === 'openNotify') { return notifySheet(id); }
       if (btn.dataset.act === 'addPay') {
         const amount = Number(root.querySelector('#pa').value);
         if (!amount || amount <= 0) return toast('Geçerli bir tutar gir.', true);
@@ -573,4 +578,183 @@ export function adminSettings() {
       closeSheet
     }
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Manuel bildirim — yöneticiden seçili üyeye                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Gönderim sunucuda yapılır. Burada yalnızca metin toplanır ve önizlenir.
+ * Yönetici anahtarı istemci koduna gömülü değildir; ilk kullanımda sorulur ve
+ * yalnızca sessionStorage'da tutulur (v0.5 demo sınırı — üretimde ADMIN RBAC).
+ */
+export function notifySheet(memberId) {
+  const m = Store.member(memberId);
+  if (!m) return;
+
+  if (!AP.hasKey()) return keySheet(memberId);
+
+  sheet(`
+    <div>
+      <p class="eyebrow">BİLDİRİM GÖNDER</p>
+      <h2>${esc(m.name)}</h2>
+      <p class="tiny muted mono">${esc(m.memberNo)}</p>
+    </div>
+
+    <div class="card flat" id="pushstate">
+      <div class="row"><span class="pill"><i></i>Bildirim durumu kontrol ediliyor…</span></div>
+    </div>
+
+    <div class="field">
+      <label for="ntpl">Şablon</label>
+      <select id="ntpl">
+        ${AP.TEMPLATES.map(t => `<option value="${t.id}">${esc(t.label)}</option>`).join('')}
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="ntitle">Başlık <span class="tiny muted" id="ncount1"></span></label>
+      <input id="ntitle" maxlength="${AP.TITLE_MAX}" placeholder="Bildirim başlığı">
+    </div>
+
+    <div class="field">
+      <label for="nbody">Mesaj <span class="tiny muted" id="ncount2"></span></label>
+      <textarea id="nbody" rows="4" style="min-height:92px" maxlength="${AP.BODY_MAX}" placeholder="Üyeye gidecek mesaj"></textarea>
+    </div>
+
+    <div class="stack tight">
+      <p class="eyebrow">ÖNİZLEME</p>
+      <div class="notifpreview">
+        <img src="assets/logo.png" alt="">
+        <div class="grow">
+          <span class="app">Orka EMS Fitness</span>
+          <b id="pvtitle">—</b>
+          <p id="pvbody">—</p>
+        </div>
+      </div>
+      <p class="tiny muted">Üyenin kilit ekranında yaklaşık böyle görünür.</p>
+    </div>
+
+    <div class="sheetfoot">
+      <button class="btn btn--primary" data-act="sendNotif" id="sendbtn" disabled>BİLDİRİMİ GÖNDER</button>
+      <button class="btn btn--ghost" data-act="closeSheet">VAZGEÇ</button>
+    </div>
+  `, (root) => {
+    const $ = (id) => root.querySelector('#' + id);
+    const tpl = $('ntpl'), title = $('ntitle'), bodyEl = $('nbody'), sendBtn = $('sendbtn');
+    let devices = 0;
+
+    const applyTemplate = () => {
+      const t = AP.templateById(tpl.value);
+      title.value = AP.fill(t.title, m.name);
+      bodyEl.value = AP.fill(t.body, m.name);
+      paint();
+      if (t.id === 'CUSTOM') bodyEl.focus();
+    };
+
+    const paint = () => {
+      const tv = title.value.trim();
+      const bv = bodyEl.value.trim();
+      $('pvtitle').textContent = tv || 'Başlık';
+      $('pvbody').textContent = bv || 'Mesaj metni burada görünecek.';
+      $('ncount1').textContent = `${title.value.length}/${AP.TITLE_MAX}`;
+      $('ncount2').textContent = `${bodyEl.value.length}/${AP.BODY_MAX}`;
+      // Mesaj boşsa ya da üyenin aktif cihazı yoksa gönderim kapalı
+      sendBtn.disabled = !tv || !bv || devices === 0;
+    };
+
+    tpl.addEventListener('change', applyTemplate);
+    title.addEventListener('input', paint);
+    bodyEl.addEventListener('input', paint);
+    applyTemplate();
+
+    // Üyenin aktif abonelikleri
+    AP.memberPushStatus(memberId).then((r) => {
+      const box = $('pushstate');
+      if (r?.reason === 'UNAUTHORIZED') {
+        AP.clearKey();
+        box.innerHTML = `<p class="small" style="color:var(--bad)">Yönetici anahtarı geçersiz.</p>`;
+        return;
+      }
+      if (r?.reason === 'NOT_CONFIGURED') {
+        box.innerHTML = `<p class="small" style="color:var(--warn)">Manuel bildirim sunucuda kapalı (DEMO_ADMIN_KEY tanımlı değil).</p>`;
+        return;
+      }
+      devices = r?.deviceCount ?? 0;
+      box.innerHTML = devices
+        ? `<div class="row between"><span class="pill ok"><i></i>Bildirimler açık</span>
+             <span class="tiny muted">${devices} cihaz</span></div>`
+        : `<div class="row between"><span class="pill"><i></i>Bildirim izni yok</span></div>
+           <p class="small muted">Bu üye henüz bu cihazında bildirim izni vermemiş.</p>`;
+      paint();
+    });
+
+    root.addEventListener('click', async (e) => {
+      const b = e.target.closest('[data-act]');
+      if (!b) return;
+      if (b.dataset.act === 'closeSheet') return closeSheet();
+      if (b.dataset.act !== 'sendNotif') return;
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'GÖNDERİLİYOR…';
+      const r = await AP.send({
+        memberId,
+        template: tpl.value,
+        title: title.value.trim(),
+        message: bodyEl.value.trim()
+      });
+
+      if (r?.ok) {
+        toast(`Bildirim gönderildi (${r.sent} cihaz).`);
+        closeSheet();
+      } else {
+        if (r?.reason === 'UNAUTHORIZED') AP.clearKey();
+        toast(r?.error ?? 'Bildirim gönderilemedi.', true);
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'BİLDİRİMİ GÖNDER';
+      }
+    });
+  });
+}
+
+/** Yönetici anahtarı bir kez sorulur; kodda tutulmaz. */
+function keySheet(memberId) {
+  sheet(`
+    <div>
+      <p class="eyebrow">YÖNETİCİ ANAHTARI</p>
+      <h2>Bildirim gönderimi</h2>
+    </div>
+    <p class="small">Üyelere serbest metin bildirimi göndermek sunucuda ayrı bir
+    anahtarla korunuyor. Anahtar yalnızca bu sekmede saklanır, koda yazılmaz.</p>
+    <div class="field">
+      <label for="akey">Anahtar</label>
+      <input id="akey" type="password" placeholder="DEMO_ADMIN_KEY" autocomplete="off">
+    </div>
+    <div class="sheetfoot">
+      <button class="btn btn--primary" data-act="saveKey">DEVAM ET</button>
+      <button class="btn btn--ghost" data-act="closeSheet">VAZGEÇ</button>
+    </div>
+  `, (root) => {
+    const input = root.querySelector('#akey');
+    input.focus();
+    const submit = async () => {
+      const v = input.value.trim();
+      if (!v) return toast('Anahtar boş olamaz.', true);
+      AP.setKey(v);
+      const r = await AP.verifyKey();
+      if (r?.ok) { closeSheet(); notifySheet(memberId); }
+      else {
+        AP.clearKey();
+        toast(r?.error ?? 'Anahtar doğrulanamadı.', true);
+      }
+    };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    root.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-act]');
+      if (!b) return;
+      if (b.dataset.act === 'closeSheet') return closeSheet();
+      if (b.dataset.act === 'saveKey') submit();
+    });
+  });
 }

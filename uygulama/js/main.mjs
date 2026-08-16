@@ -77,7 +77,22 @@ export function render() {
   document.querySelector('.view')?.scrollTo?.(0, 0);
   window.scrollTo(0, 0);
   screen.after?.();
+  measureAdminHead();
 }
+
+/** Sağ çekmece, yönetici başlığının ALTINDAN başlamalı. Yükseklik ölçülür,
+    sabit piksel varsayılmaz — başlık sarmalarsa da doğru kalır. */
+function measureAdminHead() {
+  const bar = document.querySelector('.adminbar');
+  if (!bar) return;
+  // Başlık sticky (top:0). Sayfa kaydırılmışken bounding.top 0'dır, kaydırılmamışken
+  // .view dolgusu kadar aşağıdadır. Çekmecenin çapası, başlığın EKRANDAKİ alt kenarı:
+  // yani sayfa kaydırma miktarı hesaba katılmış hâli.
+  const r = bar.getBoundingClientRect();
+  const anchor = Math.max(0, Math.round(r.bottom));
+  document.documentElement.style.setProperty('--admin-head', (anchor || 56) + 'px');
+}
+window.addEventListener('resize', measureAdminHead);
 
 function go(target, replace = false) {
   const h = '#/' + target;

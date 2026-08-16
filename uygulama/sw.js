@@ -3,11 +3,11 @@
    Sürüm bilerek "demo" ön ekli: önizleme kendi kaynağında (preview URL)
    çalışır ve üretimdeki orka-v7 önbelleğine hiçbir şekilde dokunmaz. */
 
-const VERSION = 'orka-demo-2';
+const VERSION = 'orka-demo-8';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
-  './css/app.css?v=demo2',
-  './js/main.mjs?v=demo2',
+  './css/app.css?v=demo8',
+  './js/main.mjs?v=demo8',
   './assets/logo.png',
   './icons/icon-192.png', './icons/icon-512.png',
   './icons/apple-touch-icon.png', './icons/favicon-64.png'

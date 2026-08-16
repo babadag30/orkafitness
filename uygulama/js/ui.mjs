@@ -102,14 +102,29 @@ export function toast(msg, bad = false) {
 
 /* ---------- alttan açılan panel ---------- */
 let sheetEl = null;
+
+/**
+ * Yönetim paneli.
+ * Masaüstünde sağdan açılan sabit yükseklikli çekmece, mobilde alt sayfa.
+ * İkisi de aynı DOM'u kullanır; biçimi CSS seçer.
+ *
+ * Kapatma düğmesi burada enjekte edilir — böylece her çağrı yerinde ayrı ayrı
+ * yazılmasına gerek kalmaz ve hiçbir panelde kaybolmaz.
+ */
 export function sheet(html, onMount) {
   closeSheet();
   sheetEl = document.createElement('div');
   sheetEl.className = 'sheet';
-  sheetEl.innerHTML = `<div>${html}</div>`;
-  sheetEl.addEventListener('click', (e) => { if (e.target === sheetEl) closeSheet(); });
+  sheetEl.innerHTML = `
+    <div class="sheetbox" role="dialog" aria-modal="true">
+      <button class="sheetclose" data-sheet-close aria-label="Kapat">${icon.x}</button>
+      <div class="sheetbody">${html}</div>
+    </div>`;
+  sheetEl.addEventListener('click', (e) => {
+    if (e.target === sheetEl || e.target.closest('[data-sheet-close]')) closeSheet();
+  });
   document.body.appendChild(sheetEl);
-  onMount?.(sheetEl.firstElementChild);
+  onMount?.(sheetEl.querySelector('.sheetbody'));
 }
 
 export function closeSheet() {
