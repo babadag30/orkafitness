@@ -12,7 +12,10 @@ import {
 import * as Store from './store.mjs';
 import * as A from './adapter.mjs';
 import * as AP from './admin-push.mjs';
-import { esc, fmt, icon, pill, toast, sheet, closeSheet, startOfDay } from './ui.mjs';
+import {
+  esc, fmt, icon, pill, toast, sheet, swapSheet, closeSheet, isSheetOpen,
+  startOfDay, monthStart, addMonths, dowOf, GUN_KISA_PZT
+} from './ui.mjs';
 
 const DAY = 86_400_000;
 const NAV = [['admin', 'TAKVİM'], ['adminMembers', 'ÜYELER'], ['adminSettings', 'AYARLAR']];
@@ -58,8 +61,75 @@ function shell(active, inner) {
 /* ------------------------------------------------------------------ */
 
 export function admin() {
-  const isWeek = view.mode === 'week';
+  const mode = view.mode;
   const start = anchorDay();
+
+  const HEAD = {
+    day:   ['GÜNLÜK GÖRÜNÜM', fmt.full(start)],
+    week:  ['7 GÜNLÜK GÖRÜNÜM', `${fmt.date(start)} – ${fmt.date(start + 6 * DAY)}`],
+    month: ['AYLIK GENEL BAKIŞ', fmt.monthYear(start)]
+  };
+  const [eyebrow, title] = HEAD[mode] ?? HEAD.week;
+
+  const segBtn = (m, label) =>
+    `<button class="${mode === m ? 'on' : ''}" data-act="mode${m[0].toUpperCase()}${m.slice(1)}">${label}</button>`;
+
+  return {
+    tabs: false, wide: true,
+    html: shell('admin', `
+      <div class="row between wrap" style="gap:var(--sp-3)">
+        <div>
+          <p class="eyebrow">${esc(eyebrow)}</p>
+          <h2>${esc(title)}</h2>
+        </div>
+        <div class="row" style="gap:var(--sp-3)">
+          <div class="row" style="gap:6px">
+            <button class="btn btn--secondary compact" data-act="prev" aria-label="Önceki">‹</button>
+            <button class="btn btn--secondary compact" data-act="today">BUGÜN</button>
+            <button class="btn btn--secondary compact" data-act="next" aria-label="Sonraki">›</button>
+          </div>
+          <div class="seg">${segBtn('day', 'GÜN')}${segBtn('week', 'HAFTA')}${segBtn('month', 'AY')}</div>
+        </div>
+      </div>
+
+      <div class="row wrap" style="gap:8px">
+        ${pill('EMS', 'blue')}${pill('Fitness')}${pill('Çift · münhasır', 'warn')}
+        <span class="grow"></span>
+        <span class="tiny muted">${mode === 'month'
+          ? 'Genel bakış — düzenlemek için bir güne tıkla'
+          : 'Kartı sürükle · sağ tık: Kes / Yapıştır · Ctrl/Cmd+X, +V'}</span>
+      </div>
+
+      ${mode === 'month' ? monthHtml(start) : gridHtml(mode, start)}
+    `),
+    actions: {
+      prev() {
+        view.anchor = mode === 'month' ? addMonths(start, -1)
+                    : anchorDay() - (mode === 'week' ? 7 : 1) * DAY;
+        rerender();
+      },
+      next() {
+        view.anchor = mode === 'month' ? addMonths(start, 1)
+                    : anchorDay() + (mode === 'week' ? 7 : 1) * DAY;
+        rerender();
+      },
+      today() { view.anchor = startOfDay(Date.now()); rerender(); },
+      modeDay() { view.mode = 'day'; rerender(); },
+      modeWeek() { view.mode = 'week'; rerender(); },
+      modeMonth() { view.mode = 'month'; rerender(); },
+      /* Ay yalnızca genel bakıştır: gün seçilince düzenlenebilir GÜN görünümü açılır. */
+      pickDay(el) { view.anchor = Number(el.dataset.t); view.mode = 'day'; rerender(); },
+      signout() { Store.signOut(); location.hash = '#/login'; },
+      openAppt(el) { apptSheet(el.dataset.id); },
+      openSlot(el) { slotSheet(Number(el.dataset.t)); }
+    }
+  };
+}
+
+/* ---------------- GÜN / HAFTA ızgarası ---------------- */
+
+function gridHtml(mode, start) {
+  const isWeek = mode === 'week';
   const days = isWeek ? Array.from({ length: 7 }, (_, i) => start + i * DAY) : [start];
 
   const times = [...new Set(days.flatMap(d => A.slotsOfDay(d).map(t => t - startOfDay(t))))]
@@ -79,59 +149,35 @@ export function admin() {
       }).join('')}
     </tr>`).join('');
 
-  const title = isWeek
-    ? `${fmt.date(start)} – ${fmt.date(start + 6 * DAY)}`
-    : fmt.full(start);
-  const eyebrow = isWeek ? '7 GÜNLÜK GÖRÜNÜM' : 'GÜNLÜK GÖRÜNÜM';
-
-  return {
-    tabs: false, wide: true,
-    html: shell('admin', `
-      <div class="row between wrap" style="gap:10px">
-        <div>
-          <p class="eyebrow">${eyebrow}</p>
-          <h2>${esc(title)}</h2>
-        </div>
-        <div class="row" style="gap:6px">
-          <button class="btn btn--secondary compact" data-act="prev">‹</button>
-          <button class="btn btn--secondary compact" data-act="today">BUGÜN</button>
-          <button class="btn btn--secondary compact" data-act="next">›</button>
-          <button class="btn ${isWeek ? 'btn--secondary' : 'btn--primary'} compact" data-act="modeDay">GÜN</button>
-          <button class="btn ${isWeek ? 'btn--primary' : 'btn--secondary'} compact" data-act="modeWeek">HAFTA</button>
-        </div>
-      </div>
-
-      <div class="row wrap" style="gap:8px">
-        ${pill('EMS', 'blue')}${pill('Fitness')}${pill('Çift · münhasır', 'warn')}
-        <span class="grow"></span>
-        <span class="tiny muted">Kartı sürükle · sağ tık: Kes / Yapıştır · Ctrl/Cmd+X, +V</span>
-      </div>
-
-      <div class="weekgrid">
-        <table>
-          <thead><tr><th>SAAT</th>${days.map(d => `
-            <th class="${d === today ? 'today' : ''}">
-              ${esc(fmt.dowShort(d))}<span>${fmt.dayNum(d)}</span>
-            </th>`).join('')}</tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    `),
-    actions: {
-      prev() { view.anchor = anchorDay() - (view.mode === 'week' ? 7 : 1) * DAY; rerender(); },
-      next() { view.anchor = anchorDay() + (view.mode === 'week' ? 7 : 1) * DAY; rerender(); },
-      today() { view.anchor = startOfDay(Date.now()); rerender(); },
-      modeDay() { view.mode = 'day'; rerender(); },
-      modeWeek() { view.mode = 'week'; rerender(); },
-      signout() { Store.signOut(); location.hash = '#/login'; },
-      openAppt(el) { apptSheet(el.dataset.id); },
-      openSlot(el) { slotSheet(Number(el.dataset.t)); }
-    }
-  };
+  /* Sütun genişlikleri CSS'te sabitlenir (table-layout:fixed): saat sütunu
+     sabit, kalan alan güne eşit bölünür. Aynı saatte üç randevu olması
+     Pazartesi'yi genişletemez. */
+  return `
+    <div class="weekgrid cal cal--${isWeek ? 'week' : 'day'}">
+      <table>
+        <thead><tr><th>SAAT</th>${days.map(d => `
+          <th class="${d === today ? 'today' : ''}">
+            ${esc(fmt.dowShort(d))}<span>${fmt.dayNum(d)}</span>
+          </th>`).join('')}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
+/**
+ * Bir saat hücresi. Yerleşimi HÜCRE belirler, randevular değil:
+ * 1 randevu tam hücre · 2 randevu iki şerit · 3–4 randevu kompakt 2×2.
+ * Satır yüksekliği sabittir, yoğun saat satırı uzatmaz.
+ */
 function cellHtml(t) {
   const closure = Store.closureAt(t);
+
+  if (closure) {
+    return `<div class="cell" data-n="1" data-slot="${t}">
+      <button class="appt closed" data-act="openSlot" data-t="${t}">
+        <b>Kapalı</b><em>${esc(closure.reason)}</em></button></div>`;
+  }
+
   const occ = A.occupancyAt(t);
   const items = occ.overlapping;
 
@@ -146,24 +192,94 @@ function cellHtml(t) {
       clipboard.appointmentId === a.id ? 'cut' : '',
       a.startsAt < Date.now() ? 'past' : ''
     ].filter(Boolean).join(' ');
-    return `<button class="${cls}" draggable="true" data-appt="${a.id}" data-act="openAppt" data-id="${a.id}">
+    /* Takvim kartında yalnızca ad + hizmet. Paket, ödeme ve kapasite
+       matematiği burada GÖSTERİLMEZ (detay için karta tıklanır). */
+    return `<button class="${cls}" draggable="true" data-appt="${a.id}" data-act="openAppt" data-id="${a.id}"
+              title="${esc(names.join(' + '))} · ${esc(svc(a.serviceType))}">
         <b>${esc(names.join(' + '))}</b>
         <em>${esc(svc(a.serviceType))}${a.bookingMode === BookingMode.COUPLE ? ' · Çift' : ''}</em>
       </button>`;
   }).join('');
 
-  if (closure) {
-    return `<div class="cell" data-slot="${t}">
-      <button class="appt" style="border-left-color:var(--bad);opacity:.75"
-              data-act="openSlot" data-t="${t}">
-        <b>Kapalı</b><em>${esc(closure.reason)}</em></button></div>`;
-  }
+  const canAdd = !occ.exclusiveAppointment && items.length < 4;
+  const n = Math.min(items.length, 4);
 
-  return `<div class="cell" data-slot="${t}">
+  return `<div class="cell${canAdd && n ? ' can-add' : ''}" data-n="${n}" data-slot="${t}">
     ${chips}
-    ${occ.exclusiveAppointment ? '' :
-      `<button class="emptyslot" data-act="openSlot" data-t="${t}" aria-label="Boş"></button>`}
+    ${canAdd ? `<button class="emptyslot" data-act="openSlot" data-t="${t}" aria-label="Boş saat"></button>` : ''}
   </div>`;
+}
+
+/* ---------------- AY: yalnızca genel bakış ---------------- */
+
+/**
+ * Ay görünümü randevu DÜZENLEME yüzeyi değildir: kart yok, sürükle-bırak yok.
+ * Yanıtladığı sorular: hangi gün yoğun, hangi gün boş, çift seansı nerede.
+ * Sayımlar motordan gelir (releasingStatuses kuralı burada tekrarlanmaz).
+ */
+function monthHtml(anchor) {
+  const ms = monthStart(anchor);
+  const total = Math.round((addMonths(ms, 1) - ms) / DAY);
+  const lead = (dowOf(ms) + 6) % 7;               // hafta Pazartesi başlar
+  const first = ms - lead * DAY;
+  const cells = Math.ceil((lead + total) / 7) * 7;
+
+  const stats = monthStats(first, cells);
+  const today = startOfDay(Date.now());
+
+  const body = Array.from({ length: cells }, (_, i) => {
+    const d = first + i * DAY;
+    const s = stats.get(d);
+    const other = d < ms || d >= ms + total * DAY;
+    const closed = !A.slotsOfDay(d).length;
+    const cls = ['mday', other ? 'other' : '', d === today ? 'today' : '', closed ? 'closed' : '']
+      .filter(Boolean).join(' ');
+
+    const lines = s ? [
+      s.ems ? `<span class="mstat ems"><i></i>EMS ${s.ems}</span>` : '',
+      s.fit ? `<span class="mstat fit"><i></i>Fitness ${s.fit}</span>` : '',
+      s.cpl ? `<span class="mstat cpl"><i></i>Çift ${s.cpl}</span>` : ''
+    ].filter(Boolean).join('') : '';
+
+    return `<button class="${cls}" data-act="pickDay" data-t="${d}"
+              aria-label="${esc(fmt.full(d))}">
+      <span class="num">${fmt.dayNum(d)}</span>
+      ${lines ? `<span class="mstats">${lines}</span>`
+              : `<span class="quiet">${closed ? 'Kapalı' : other ? '' : 'Boş'}</span>`}
+    </button>`;
+  }).join('');
+
+  return `
+    <div class="monthgrid">
+      <div class="monthhead">${GUN_KISA_PZT.map(g => `<span>${g}</span>`).join('')}</div>
+      <div class="monthbody">${body}</div>
+    </div>`;
+}
+
+/** Gün başlangıcı → {ems, fit, cpl}. Her randevu bir kez sayılır. */
+function monthStats(from, days) {
+  const to = from + days * DAY;
+  const out = new Map();
+  const seen = new Set();
+
+  // Motor saat bazlı çalışır; yalnızca gerçekten dolu saatler sorgulanır.
+  const occupied = [...new Set(Store.get().appointments.map(a => a.startsAt))]
+    .filter(t => t >= from && t < to);
+
+  for (const t of occupied) {
+    for (const a of A.occupancyAt(t).overlapping) {
+      if (seen.has(a.id)) continue;
+      seen.add(a.id);
+      const d = startOfDay(a.startsAt);
+      if (d < from || d >= to) continue;
+      const s = out.get(d) ?? { ems: 0, fit: 0, cpl: 0 };
+      if (a.bookingMode === BookingMode.COUPLE) s.cpl++;
+      else if (a.serviceType === ServiceType.FITNESS) s.fit++;
+      else s.ems++;
+      out.set(d, s);
+    }
+  }
+  return out;
 }
 
 /* ------------------------------------------------------------------ */
@@ -177,12 +293,12 @@ export function apptSheet(id) {
   const past = a.startsAt < Date.now();
 
   sheet(`
-    <div class="row between">
-      <div>
-        <p class="eyebrow">${esc(fmt.full(a.startsAt))}</p>
+    <div class="sheethead">
+      <p class="eyebrow">${esc(fmt.full(a.startsAt))}</p>
+      <div class="row between">
         <h2>${esc(fmt.time(a.startsAt))} · ${esc(svc(a.serviceType))}${couple ? ' · Çift' : ''}</h2>
+        ${couple ? pill('Münhasır', 'warn') : ''}
       </div>
-      ${couple ? pill('Münhasır seans', 'warn') : ''}
     </div>
 
     ${couple ? `<p class="small muted">Bu saat stüdyoda başka hiçbir randevuya açık değil.</p>` : ''}
@@ -190,17 +306,16 @@ export function apptSheet(id) {
     <div class="stack tight">
       ${a.participants.map(p => {
         const m = Store.member(p.memberId);
-        const u = A.usage(p.memberId);
         return `
           <div class="card flat">
             <div class="row between">
-              <div>
+              <div class="grow">
                 <h3>${esc(m?.name ?? p.memberId)}</h3>
-                <p class="tiny muted mono">${esc(m?.memberNo ?? '')}${u ? ` · paket ${u.packageUsed}/${u.packageTotal}` : ''}</p>
+                <p class="tiny muted mono">${esc(m?.memberNo ?? '')}</p>
               </div>
               ${attPill(p.attendanceStatus)}
             </div>
-            <div class="row" style="gap:6px;flex-wrap:wrap">
+            <div class="row wrap" style="gap:6px">
               <button class="btn btn--secondary compact" data-act="att" data-m="${p.memberId}" data-s="ATTENDED">Geldi</button>
               <button class="btn btn--secondary compact" data-act="att" data-m="${p.memberId}" data-s="NO_SHOW">Gelmedi</button>
               <button class="btn btn--secondary compact" data-act="late" data-m="${p.memberId}">Geç iptal</button>
@@ -210,9 +325,11 @@ export function apptSheet(id) {
       }).join('')}
     </div>
 
-    ${!past ? `<button class="btn btn--secondary" data-act="cut">KES (taşımak için)</button>` : ''}
-    <button class="btn btn--danger" data-act="adminCancel">RANDEVUYU İPTAL ET</button>
-    <button class="btn btn--ghost" data-act="closeSheet">KAPAT</button>
+    ${!past ? `<button class="btn btn--secondary" data-act="cut">KES — BAŞKA SAATE TAŞI</button>` : ''}
+
+    <div class="dangerzone">
+      <button class="btn btn--danger" data-act="adminCancel">RANDEVUYU İPTAL ET</button>
+    </div>
   `, (root) => {
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]');
@@ -268,8 +385,14 @@ export function slotSheet(t) {
   const eligible = Store.memberList().filter(m => m.active);
 
   sheet(`
-    <p class="eyebrow">${esc(fmt.full(t))}</p>
-    <h2>${esc(fmt.time(t))}</h2>
+    <div class="sheethead">
+      <p class="eyebrow">${esc(fmt.full(t))}</p>
+      <div class="row between">
+        <h2>${esc(fmt.time(t))}</h2>
+        ${closure ? pill('Kapalı', 'bad') : ''}
+      </div>
+    </div>
+
     <p class="small muted">EMS ${occ.emsPeople}/${A.POLICY.capacity.ems} ·
        Fitness ${occ.fitnessPeople}/${A.POLICY.capacity.fitness} ·
        Toplam ${occ.totalPeople}/${A.POLICY.capacity.total}</p>
@@ -292,13 +415,15 @@ export function slotSheet(t) {
             <option value="FITNESS">Fitness</option>
           </select>
         </div>
-        <button class="btn btn--secondary" data-act="manual">RANDEVU EKLE</button>
+        <button class="btn btn--primary" data-act="manual">RANDEVU EKLE</button>
       </div>` : ''}
 
-    <button class="btn ${closure ? 'btn--secondary' : 'btn--danger'}" data-act="toggleClose">
-      ${closure ? 'SEANSI YENİDEN AÇ' : 'SEANSI KAPAT'}
-    </button>
-    <button class="btn btn--ghost" data-act="closeSheet">KAPAT</button>
+    <div class="dangerzone">
+      <button class="btn ${closure ? 'btn--secondary' : 'btn--danger'}" data-act="toggleClose">
+        ${closure ? 'SEANSI YENİDEN AÇ' : 'SEANSI KAPAT'}
+      </button>
+      <button class="btn btn--ghost" data-act="closeSheet">VAZGEÇ</button>
+    </div>
   `, (root) => {
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]');
@@ -346,16 +471,20 @@ export function attemptMove(appointmentId, targetStartsAt) {
   const names = a.participants.map(p => Store.member(p.memberId)?.name).filter(Boolean).join(' + ');
 
   sheet(`
-    <h2>Randevuyu taşı</h2>
+    <div class="sheethead">
+      <p class="eyebrow">RANDEVUYU TAŞI</p>
+      <h2>${esc(names)}</h2>
+    </div>
     <div class="card flat">
-      <h3>${esc(names)}</h3>
-      <p class="small">${esc(fmt.full(a.startsAt))} ${esc(fmt.time(a.startsAt))}</p>
-      <p class="small" style="color:var(--accent-2)">→ ${esc(fmt.full(targetStartsAt))} ${esc(fmt.time(targetStartsAt))}</p>
+      <div class="row between"><span class="small muted">Şu an</span>
+        <b class="small">${esc(fmt.full(a.startsAt))} · ${esc(fmt.time(a.startsAt))}</b></div>
+      <div class="row between"><span class="small muted">Yeni saat</span>
+        <b class="small" style="color:var(--brand)">${esc(fmt.full(targetStartsAt))} · ${esc(fmt.time(targetStartsAt))}</b></div>
     </div>
     ${check.allowed
       ? `<p class="small muted">Hedef saat uygun. Üyeye bildirim gidecek.</p>
          <button class="btn btn--primary" data-act="ok">TAŞI VE BİLDİR</button>`
-      : `<div class="card" style="border-color:rgba(248,113,113,.35)">
+      : `<div class="card bad">
            <p class="eyebrow" style="color:var(--bad)">TAŞINAMAZ</p>
            <p class="small">${esc(check.adminMessage)}</p>
          </div>
@@ -404,8 +533,8 @@ export function adminMembers() {
       <div class="weekgrid" style="overflow-x:auto">
         <table class="tbl">
           <thead><tr>
-            <th>Üye</th><th>No</th><th>EMS paketi</th><th>Bu hafta</th>
-            <th>Fitness</th><th>Partner</th><th>Bakiye</th><th>Durum</th>
+            <th>Üye</th><th>EMS paketi</th><th>Bu hafta</th>
+            <th>Fitness</th><th>Partner</th><th class="num">Bakiye</th><th>Durum</th>
           </tr></thead>
           <tbody>
             ${list.map(m => {
@@ -413,13 +542,12 @@ export function adminMembers() {
               const p = A.partner(m.id);
               const b = Store.balanceOf(m.id);
               return `<tr data-act="openMember" data-id="${m.id}">
-                <td><b>${esc(m.name)}</b></td>
-                <td class="mono muted">${esc(m.memberNo)}</td>
-                <td>${u ? `${u.packageUsed}/${u.packageTotal}` : '—'}</td>
-                <td>${u ? `${u.bucketUsed}/${u.bucketLimit}` : '—'}</td>
+                <td><b>${esc(m.name)}</b><span class="sub mono">${esc(m.memberNo)}</span></td>
+                <td class="mono">${u ? `${u.packageUsed}/${u.packageTotal}` : '—'}</td>
+                <td class="mono">${u ? `${u.bucketUsed}/${u.bucketLimit}` : '—'}</td>
                 <td>${m.fitnessAccess ? '✓' : '—'}</td>
-                <td>${p ? esc(p.name.split(' ')[0]) : '—'}</td>
-                <td style="color:${b.debt > 0 ? 'var(--warn)' : 'var(--text-2)'}">${esc(fmt.money(b.debt))}</td>
+                <td>${p ? esc(p.name.split(' ')[0]) : '<span class="muted">—</span>'}</td>
+                <td class="num"><b style="color:${b.debt > 0 ? 'var(--warn)' : 'var(--ok)'}">${esc(fmt.money(b.debt))}</b></td>
                 <td>${m.active ? pill('Aktif', 'ok') : pill('Pasif', 'bad')}</td>
               </tr>`;
             }).join('')}
@@ -434,29 +562,37 @@ export function adminMembers() {
   };
 }
 
-function memberSheet(id) {
+/** Üye panelinin içeriği. Çekmecede de, çekmece içi geri dönüşte de kullanılır. */
+function memberPanel(id) {
   const m = Store.member(id);
+  if (!m) return null;
   const u = A.usage(id);
   const b = Store.balanceOf(id);
   const pays = Store.paymentsOf(id);
   const METOT = { CASH: 'Nakit', CARD: 'Kart', BANK_TRANSFER: 'Havale' };
 
-  sheet(`
-    <div class="row between">
-      <div><h2>${esc(m.name)}</h2><p class="tiny muted mono">${esc(m.memberNo)}</p></div>
-      ${m.active ? pill('Aktif', 'ok') : pill('Pasif', 'bad')}
+  const p = A.partner(id);
+
+  const html = `
+    <div class="sheethead">
+      <div class="row between">
+        <h2>${esc(m.name)}</h2>
+        ${m.active ? pill('Aktif', 'ok') : pill('Pasif', 'bad')}
+      </div>
+      <p class="tiny muted mono">${esc(m.memberNo)}</p>
     </div>
 
     ${u ? `<div class="card flat">
-      <div class="row between"><span class="small muted">Paket</span><b>${u.packageUsed} / ${u.packageTotal}</b></div>
-      <div class="row between"><span class="small muted">Bu hafta</span><b>${u.bucketUsed} / ${u.bucketLimit}</b></div>
+      <div class="row between"><span class="small muted">EMS paketi</span><b class="mono">${u.packageUsed} / ${u.packageTotal}</b></div>
+      <div class="row between"><span class="small muted">Bu hafta</span><b class="mono">${u.bucketUsed} / ${u.bucketLimit}</b></div>
+      ${p ? `<div class="row between"><span class="small muted">Partner</span><b class="small">${esc(p.name)}</b></div>` : ''}
     </div>` : `<div class="card flat"><p class="small">EMS paketi yok.</p></div>`}
 
     <div class="card flat">
-      <div class="row between"><span class="small muted">Paket bedeli</span><b>${esc(fmt.money(b.due))}</b></div>
-      <div class="row between"><span class="small muted">Ödenen</span><b>${esc(fmt.money(b.paid))}</b></div>
+      <div class="row between"><span class="small muted">Paket bedeli</span><b class="mono">${esc(fmt.money(b.due))}</b></div>
+      <div class="row between"><span class="small muted">Ödenen</span><b class="mono">${esc(fmt.money(b.paid))}</b></div>
       <div class="row between"><span class="small muted">Kalan</span>
-        <b style="color:${b.debt > 0 ? 'var(--warn)' : 'var(--ok)'}">${esc(fmt.money(b.debt))}</b></div>
+        <b class="mono" style="color:${b.debt > 0 ? 'var(--warn)' : 'var(--ok)'}">${esc(fmt.money(b.debt))}</b></div>
     </div>
 
     <div class="stack tight">
@@ -473,19 +609,21 @@ function memberSheet(id) {
     </div>
 
     ${pays.length ? `<div class="stack tight"><p class="eyebrow">ÖDEME GEÇMİŞİ</p>
-      ${pays.map(p => `<div class="row between small">
-        <span class="muted">${esc(fmt.date(p.paidAt))} · ${esc(METOT[p.method] ?? p.method)}${p.note ? ` · ${esc(p.note)}` : ''}</span>
-        <b>${esc(fmt.money(p.amount))}</b></div>`).join('')}</div>` : ''}
+      ${pays.map(x => `<div class="row between small">
+        <span class="muted">${esc(fmt.date(x.paidAt))} · ${esc(METOT[x.method] ?? x.method)}${x.note ? ` · ${esc(x.note)}` : ''}</span>
+        <b class="mono">${esc(fmt.money(x.amount))}</b></div>`).join('')}</div>` : ''}
 
     <div class="sheetfoot">
       <button class="btn btn--primary" data-act="openNotify">${icon.bell} BİLDİRİM GÖNDER</button>
       <button class="btn btn--ghost" data-act="closeSheet">KAPAT</button>
-    </div>
-  `, (root) => {
+    </div>`;
+
+  const mount = (root) => {
     root.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-act]');
       if (!btn) return;
-      if (btn.dataset.act === 'openNotify') { return notifySheet(id); }
+      // Aynı çekmecenin içinde yer değiştirir — üst üste ikinci çekmece açılmaz.
+      if (btn.dataset.act === 'openNotify') return notifySheet(id, { from: 'member' });
       if (btn.dataset.act === 'addPay') {
         const amount = Number(root.querySelector('#pa').value);
         if (!amount || amount <= 0) return toast('Geçerli bir tutar gir.', true);
@@ -500,7 +638,16 @@ function memberSheet(id) {
       closeSheet();
       rerender();
     });
-  });
+  };
+
+  /* Üye detayı listeyle yan yana okunduğu için ÇEKMECE; ama ekran kenarına
+     yapışan duvar değil, kenarlardan içeri çekilmiş yüzen panel. */
+  return { html, mount };
+}
+
+function memberSheet(id) {
+  const v = memberPanel(id);
+  if (v) sheet(v.html, v.mount, { variant: 'drawer' });
 }
 
 /* ------------------------------------------------------------------ */
@@ -544,7 +691,7 @@ export function adminSettings() {
         </div>
 
         <div class="stack">
-          <div class="card" style="border-color:rgba(251,191,36,.3)">
+          <div class="card warn">
             <p class="eyebrow" style="color:var(--warn)">GEÇİCİ KARARLAR</p>
             <p class="small">Aşağıdakiler işletme sahibi onayı bekliyor. Nihai karar değildir.</p>
             ${DEMO_PROVISIONAL_NOTES.map(n => `<p class="small">· ${esc(n)}</p>`).join('')}
@@ -589,18 +736,30 @@ export function adminSettings() {
  * Yönetici anahtarı istemci koduna gömülü değildir; ilk kullanımda sorulur ve
  * yalnızca sessionStorage'da tutulur (v0.5 demo sınırı — üretimde ADMIN RBAC).
  */
-export function notifySheet(memberId) {
+/** Panel açık ise İÇERİĞİ DEĞİŞİR; üst üste ikinci bir çekmece açılmaz. */
+function present(html, mount) {
+  if (isSheetOpen()) swapSheet(html, mount);
+  else sheet(html, mount, { variant: 'drawer' });
+}
+
+const backBtn = (from) => from === 'member'
+  ? `<button class="btn btn--ghost compact" data-act="backToMember">‹ ÜYE DETAYI</button>` : '';
+
+export function notifySheet(memberId, opts = {}) {
+  const from = opts.from;
   const m = Store.member(memberId);
   if (!m) return;
 
-  if (!AP.hasKey()) return keySheet(memberId);
+  if (!AP.hasKey()) return keySheet(memberId, opts);
 
-  sheet(`
-    <div>
+  present(`
+    <div class="sheethead">
       <p class="eyebrow">BİLDİRİM GÖNDER</p>
       <h2>${esc(m.name)}</h2>
       <p class="tiny muted mono">${esc(m.memberNo)}</p>
     </div>
+
+    ${backBtn(from)}
 
     <div class="card flat" id="pushstate">
       <div class="row"><span class="pill"><i></i>Bildirim durumu kontrol ediliyor…</span></div>
@@ -694,6 +853,10 @@ export function notifySheet(memberId) {
       const b = e.target.closest('[data-act]');
       if (!b) return;
       if (b.dataset.act === 'closeSheet') return closeSheet();
+      if (b.dataset.act === 'backToMember') {
+        const v = memberPanel(memberId);
+        return v && swapSheet(v.html, v.mount);
+      }
       if (b.dataset.act !== 'sendNotif') return;
 
       sendBtn.disabled = true;
@@ -719,12 +882,14 @@ export function notifySheet(memberId) {
 }
 
 /** Yönetici anahtarı bir kez sorulur; kodda tutulmaz. */
-function keySheet(memberId) {
-  sheet(`
-    <div>
+function keySheet(memberId, opts = {}) {
+  const from = opts.from;
+  present(`
+    <div class="sheethead">
       <p class="eyebrow">YÖNETİCİ ANAHTARI</p>
       <h2>Bildirim gönderimi</h2>
     </div>
+    ${backBtn(from)}
     <p class="small">Üyelere serbest metin bildirimi göndermek sunucuda ayrı bir
     anahtarla korunuyor. Anahtar yalnızca bu sekmede saklanır, koda yazılmaz.</p>
     <div class="field">
@@ -743,7 +908,8 @@ function keySheet(memberId) {
       if (!v) return toast('Anahtar boş olamaz.', true);
       AP.setKey(v);
       const r = await AP.verifyKey();
-      if (r?.ok) { closeSheet(); notifySheet(memberId); }
+      // Anahtar kabul edilirse aynı panelde yazaca geçilir.
+      if (r?.ok) notifySheet(memberId, opts);
       else {
         AP.clearKey();
         toast(r?.error ?? 'Anahtar doğrulanamadı.', true);
@@ -754,6 +920,10 @@ function keySheet(memberId) {
       const b = e.target.closest('[data-act]');
       if (!b) return;
       if (b.dataset.act === 'closeSheet') return closeSheet();
+      if (b.dataset.act === 'backToMember') {
+        const v = memberPanel(memberId);
+        return v && swapSheet(v.html, v.mount);
+      }
       if (b.dataset.act === 'saveKey') submit();
     });
   });

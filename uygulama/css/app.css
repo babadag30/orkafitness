@@ -1,48 +1,74 @@
 /* Orka EMS Fitness — işletme sahibi demosu tasarım sistemi
-   Yön: v0.4 §3 — koyu tema öncelikli, premium, modern sans-serif,
-   kömür yüzeyler, elektrik mavisi vurgu, ölçülü camgöbeği, cömert boşluk. */
+   Yön: sıcak açık / gül tonlu premium. Renkler uydurulmadı; hepsi gerçek
+   Orka web sitesinin kaynağından alındı (bkz. /index.html):
+
+     arka plan geçişi  linear-gradient(180deg,#ffffff,#faf4f5,#f3ebee,#efe6ea)
+     marka kırmızısı   #e8141f  (+ kendi tintleri rgba(232,20,31,.08/.16))
+     metin             #0f0f12
+     kenarlık          #e0e0e5
+     olumlu            #1f9454
+
+   Hizmet renkleri marka renginden AYRIDIR ve anlamsaldır (EMS / Fitness / Çift). */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Katmanlar bilinçli olarak yakın-siyahtan uzaklaştırıldı: sayfa → takvim →
-     kart sırasıyla açılır, böylece derinlik parlaklıkla değil katmanla anlatılır. */
-  --bg:        #12151C;   /* sayfa      */
-  --bg-soft:   #171B23;   /* takvim yüzeyi */
-  --surface:   #1C212B;   /* kart       */
-  --surface-2: #232935;   /* yükseltilmiş kart */
-  --surface-3: #2C3341;   /* etkileşim  */
-  --border:    #333B4A;
-  --border-soft: #272E3A;
+  /* Yüzeyler sıcak beyazdan gül tonuna doğru katmanlanır: sayfa → takvim →
+     kart. Derinlik gölgeyle değil katmanla anlatılır. */
+  --bg:        #FBF8F9;   /* sayfa tabanı (üstünde marka geçişi durur) */
+  --bg-soft:   #F5EFF1;   /* takvim / nötr açık yüzey */
+  --surface:   #FFFFFF;   /* kart, panel */
+  --surface-2: #FAF6F7;   /* ikincil kart */
+  --surface-3: #F0E8EB;   /* etkileşim (hover / basılı) */
+  --border:      #E4DADE;
+  --border-soft: #EFE7EA;
 
-  --text:      #EDF0F5;
-  --text-2:    #AEB7C4;
-  --muted:     #78828F;
+  --text:   #1A171C;      /* derin kömür — saf siyah değil */
+  --text-2: #5A5360;
+  --muted:  #8B838F;
 
-  --accent:    #3B82F6;
-  --accent-2:  #22D3EE;
-  --accent-dim: #1E3A8A;
+  /* Marka — birincil eylem rengi */
+  --brand:      #E8141F;
+  --brand-deep: #C10E18;
+  --brand-tint: rgba(232,20,31,.08);
+  --brand-ring: rgba(232,20,31,.16);
 
-  --ok:        #34D399;
-  --warn:      #FBBF24;
-  --bad:       #F87171;
+  /* Hizmet renkleri — anlamsal, markadan bağımsız */
+  --ems:     #1F6F94;   /* ölçülü soğuk mavi   */
+  --fitness: #5B6470;   /* nötr grafit         */
+  --couple:  #B07C1B;   /* sıcak kehribar      */
+
+  --ok:   #1F9454;
+  --warn: #B0761A;
+  --bad:  #B3261E;      /* markadan ayrışsın diye daha koyu, dolu değil tint */
+
+  --ok-tint:   rgba(31,148,84,.10);
+  --warn-tint: rgba(176,118,26,.10);
+  --bad-tint:  rgba(179,38,30,.09);
+  --ems-tint:  rgba(31,111,148,.10);
 
   --r-sm: 10px;
   --r:    14px;
-  --r-lg: 20px;
-  --r-xl: 28px;
+  --r-lg: 18px;
+  --r-xl: 24px;
 
   --sp-1: 6px;  --sp-2: 10px; --sp-3: 14px;
   --sp-4: 18px; --sp-5: 24px; --sp-6: 32px; --sp-7: 44px;
 
-  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.28);
-  --shadow-lg: 0 2px 4px rgba(0,0,0,.4), 0 20px 48px rgba(0,0,0,.44);
+  /* Açık temada gölgeler yumuşak ve sıcak; sert siyah gölge kirli görünür. */
+  --shadow:    0 1px 2px rgba(26,23,28,.05), 0 6px 18px rgba(26,23,28,.05);
+  --shadow-md: 0 2px 6px rgba(26,23,28,.06), 0 14px 32px rgba(26,23,28,.09);
+  --shadow-lg: 0 4px 10px rgba(26,23,28,.07), 0 28px 60px rgba(26,23,28,.16);
 
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --tab-h: 62px;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
+
+  /* Takvim: saat sütunu sabit, gün satırı öngörülebilir yükseklikte */
+  --time-col: 64px;
+  --slot-h: 64px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -59,31 +85,26 @@ body {
   overflow-x: hidden;
 }
 
-/* Uygulama kabuğu — telefon çerçevesi, geniş ekranda ortalanır */
+/* Marka geçişi — web sitesindeki ile birebir aynı. Neredeyse görünmez
+   olmalı: sıcak beyazdan çok açık güle. Doygun pembe YOK. */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, #ffffff 0%, #faf4f5 40%, #f3ebee 70%, #efe6ea 100%);
+}
+
+/* Uygulama kabuğu — telefon genişliği, geniş ekranda ortalanır */
 .app {
   position: relative;
   width: 100%;
   max-width: 460px;
   min-height: 100dvh;
   margin: 0 auto;
-  background: var(--bg);
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
 }
 .app.wide { max-width: none; }
-
-/* Arka plandaki yumuşak ışık — düz siyahı kırar */
-.app::before {
-  content: '';
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 420px;
-  /* Tek, çok yumuşak ışık. Eskiden iki katmanlı neon parıltı vardı. */
-  background: radial-gradient(110% 90% at 50% -25%, rgba(59,130,246,.07), transparent 65%);
-  pointer-events: none;
-  z-index: 0;
-}
 
 .view {
   position: relative;
@@ -116,12 +137,12 @@ p  { color: var(--text-2); }
   font-size: 11px; font-weight: 650; letter-spacing: .09em;
   text-transform: uppercase; color: var(--muted);
 }
-.eyebrow.accent { color: var(--accent-2); }
+.eyebrow.accent { color: var(--brand); }
 
 .row { display: flex; align-items: center; gap: var(--sp-3); }
 .row.between { justify-content: space-between; }
 .row.wrap { flex-wrap: wrap; }
-.grow { flex: 1; }
+.grow { flex: 1; min-width: 0; }
 .stack { display: flex; flex-direction: column; gap: var(--sp-3); }
 .stack.tight { gap: var(--sp-2); }
 
@@ -135,43 +156,48 @@ p  { color: var(--text-2); }
   display: grid; place-items: center;
   width: 40px; height: 40px; flex: 0 0 40px;
   border-radius: 12px; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text);
-  cursor: pointer; transition: background .15s, border-color .15s;
+  background: var(--surface); color: var(--text-2);
+  cursor: pointer; transition: background .15s, border-color .15s, color .15s;
 }
-.iconbtn:hover { background: var(--surface-2); border-color: var(--surface-3); }
+.iconbtn:hover { background: var(--surface-3); color: var(--text); }
 .iconbtn.ghost { background: transparent; border-color: transparent; }
-.iconbtn.ghost:hover { background: var(--surface); }
+.iconbtn.ghost:hover { background: var(--surface-3); }
 
 /* ---------- kartlar ---------- */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border-soft);
+  border: 1px solid var(--border);
   border-radius: var(--r-lg);
   padding: var(--sp-4);
   display: flex; flex-direction: column; gap: var(--sp-2);
+  box-shadow: var(--shadow);
 }
-.card.flat { background: var(--bg-soft); }
+.card.flat { background: var(--bg-soft); border-color: var(--border-soft); box-shadow: none; }
 .card.tap {
   cursor: pointer; text-align: left; width: 100%;
   font: inherit; color: inherit;
-  transition: transform .12s, border-color .15s, background .15s;
+  transition: transform .12s, border-color .15s, box-shadow .15s;
 }
-.card.tap:hover { border-color: var(--surface-3); background: var(--surface-2); }
+.card.tap:hover { border-color: var(--brand-ring); box-shadow: var(--shadow-md); }
 .card.tap:active { transform: scale(.988); }
+/* Anlamsal kart kenarları — JS'te satır içi renk kalmasın diye sınıfa alındı */
+.card.warn { border-color: rgba(176,118,26,.34); background: var(--warn-tint); }
+.card.bad  { border-color: rgba(179,38,30,.30);  background: var(--bad-tint); }
 
 /* Öne çıkan kart — sıradaki randevu */
 .hero {
   position: relative; overflow: hidden;
-  background: linear-gradient(150deg, #212C42 0%, #1D2430 52%, var(--surface) 100%);
-  border: 1px solid rgba(96,140,220,.22);
+  background: linear-gradient(150deg, #FFF3F4 0%, #FFF9F9 46%, var(--surface) 100%);
+  border: 1px solid var(--brand-ring);
   border-radius: var(--r-xl);
   padding: var(--sp-5);
   display: flex; flex-direction: column; gap: var(--sp-3);
+  box-shadow: var(--shadow-md);
 }
 .hero::after {
   content: ''; position: absolute; right: -60px; top: -70px;
   width: 210px; height: 210px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(96,165,250,.10), transparent 70%);
+  background: radial-gradient(circle, var(--brand-tint), transparent 70%);
 }
 .hero > * { position: relative; z-index: 1; }
 .hero .when { font-size: 30px; font-weight: 700; letter-spacing: -.03em; }
@@ -183,65 +209,86 @@ p  { color: var(--text-2); }
   border-radius: var(--r); border: 1px solid transparent;
   font: inherit; font-size: 14.5px; font-weight: 600; letter-spacing: -.01em;
   cursor: pointer; width: 100%;
-  transition: transform .12s, filter .15s, background .15s;
+  transition: transform .12s, filter .15s, background .15s, border-color .15s;
 }
 .btn:active { transform: scale(.985); }
 .btn--primary {
-  background: linear-gradient(135deg, var(--accent), #2563EB);
-  color: #fff; box-shadow: 0 2px 10px rgba(37,99,235,.22);
+  background: linear-gradient(135deg, var(--brand), var(--brand-deep));
+  color: #fff; box-shadow: 0 2px 10px rgba(232,20,31,.20);
 }
-.btn--primary:hover { filter: brightness(1.08); }
-.btn--secondary { background: var(--surface-2); color: var(--text); border-color: var(--border); }
-.btn--secondary:hover { background: var(--surface-3); }
+.btn--primary:hover { filter: brightness(1.06); }
+.btn--secondary { background: var(--surface); color: var(--text); border-color: var(--border); box-shadow: var(--shadow); }
+.btn--secondary:hover { background: var(--surface-3); border-color: var(--brand-ring); }
 .btn--ghost { background: transparent; color: var(--text-2); border-color: var(--border); }
-.btn--ghost:hover { color: var(--text); border-color: var(--surface-3); }
-.btn--danger { background: rgba(248,113,113,.12); color: var(--bad); border-color: rgba(248,113,113,.3); }
-.btn--danger:hover { background: rgba(248,113,113,.2); }
+.btn--ghost:hover { color: var(--text); background: var(--surface-3); }
+/* Yıkıcı eylem markayla karışmasın: dolu değil, tint + koyu kırmızı */
+.btn--danger { background: var(--bad-tint); color: var(--bad); border-color: rgba(179,38,30,.30); }
+.btn--danger:hover { background: rgba(179,38,30,.15); border-color: rgba(179,38,30,.45); }
 .btn.compact { min-height: 40px; padding: 0 var(--sp-4); font-size: 13px; width: auto; }
-.btn[disabled] { opacity: .42; pointer-events: none; }
+.btn[disabled] { opacity: .45; pointer-events: none; box-shadow: none; }
+
+/* Segment seçici — GÜN | HAFTA | AY */
+.seg {
+  display: inline-flex; border: 1px solid var(--border);
+  border-radius: 11px; overflow: hidden; background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.seg button {
+  border: none; background: none; cursor: pointer;
+  font: inherit; font-size: 12px; font-weight: 650; letter-spacing: .04em;
+  color: var(--text-2); padding: 9px 15px;
+  transition: background .14s, color .14s;
+}
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button:hover { background: var(--surface-3); color: var(--text); }
+.seg button.on { background: var(--brand); color: #fff; }
+.seg button.on:hover { background: var(--brand-deep); }
 
 /* ---------- rozetler ---------- */
 .pill {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 11px; border-radius: 999px;
   font-size: 11.5px; font-weight: 600; letter-spacing: .01em;
-  background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-2); border: 1px solid var(--border);
   white-space: nowrap;
 }
 .pill i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.pill.ok   { color: var(--ok);   background: rgba(52,211,153,.10); border-color: rgba(52,211,153,.26); }
-.pill.warn { color: var(--warn); background: rgba(251,191,36,.10); border-color: rgba(251,191,36,.26); }
-.pill.bad  { color: var(--bad);  background: rgba(248,113,113,.10); border-color: rgba(248,113,113,.26); }
-.pill.blue { color: var(--accent-2); background: rgba(34,211,238,.10); border-color: rgba(34,211,238,.26); }
+.pill.ok   { color: var(--ok);   background: var(--ok-tint);   border-color: rgba(31,148,84,.28); }
+.pill.warn { color: var(--warn); background: var(--warn-tint); border-color: rgba(176,118,26,.30); }
+.pill.bad  { color: var(--bad);  background: var(--bad-tint);  border-color: rgba(179,38,30,.28); }
+.pill.blue { color: var(--ems);  background: var(--ems-tint);  border-color: rgba(31,111,148,.28); }
 
 /* ---------- kullanım ölçerleri ---------- */
 .usage { display: flex; gap: var(--sp-3); }
 .usage .cell {
-  flex: 1; background: var(--surface); border: 1px solid var(--border-soft);
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r); padding: var(--sp-3) var(--sp-4);
   display: flex; flex-direction: column; gap: 8px;
+  box-shadow: var(--shadow);
 }
 .usage .val { font-size: 21px; font-weight: 700; letter-spacing: -.02em; }
 .usage .val span { font-size: 13px; font-weight: 500; color: var(--muted); }
 .bar { height: 5px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
 .bar > i { display: block; height: 100%; border-radius: 99px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+  background: linear-gradient(90deg, var(--brand), var(--brand-deep)); }
 
 /* ---------- seçim listeleri ---------- */
 .choice {
   display: flex; align-items: center; gap: var(--sp-4);
-  background: var(--surface); border: 1px solid var(--border-soft);
-  border-radius: var(--r-lg); padding: var(--sp-4) var(--sp-4);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: var(--sp-4);
   cursor: pointer; width: 100%; text-align: left; font: inherit; color: inherit;
-  transition: border-color .15s, background .15s, transform .12s;
+  box-shadow: var(--shadow);
+  transition: border-color .15s, box-shadow .15s, transform .12s;
 }
-.choice:hover { border-color: var(--accent); background: var(--surface-2); }
+.choice:hover { border-color: var(--brand-ring); box-shadow: var(--shadow-md); }
 .choice:active { transform: scale(.99); }
 .choice .ico {
   display: grid; place-items: center; width: 46px; height: 46px; flex: 0 0 46px;
-  border-radius: 14px; background: rgba(59,130,246,.13); color: var(--accent-2);
+  border-radius: 14px; background: var(--brand-tint); color: var(--brand);
 }
-.choice .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.choice .ico.ems { background: var(--ems-tint); color: var(--ems); }
+.choice .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 
 /* ---------- tarih şeridi ---------- */
 .daystrip {
@@ -252,60 +299,62 @@ p  { color: var(--text-2); }
 .day {
   flex: 0 0 58px; display: flex; flex-direction: column; align-items: center; gap: 3px;
   padding: 11px 0; border-radius: var(--r); cursor: pointer;
-  background: var(--surface); border: 1px solid var(--border-soft);
+  background: var(--surface); border: 1px solid var(--border);
   font: inherit; color: var(--text-2);
   transition: background .15s, border-color .15s, color .15s;
 }
 .day b { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
 .day em { font-style: normal; font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; }
 .day.on {
-  background: linear-gradient(150deg, var(--accent), #2563EB);
-  border-color: transparent; color: rgba(255,255,255,.85);
-  box-shadow: 0 2px 10px rgba(37,99,235,.24);
+  background: linear-gradient(150deg, var(--brand), var(--brand-deep));
+  border-color: transparent; color: rgba(255,255,255,.86);
+  box-shadow: 0 2px 10px rgba(232,20,31,.22);
 }
 .day.on b { color: #fff; }
-.day.off { opacity: .32; pointer-events: none; }
+.day.off { opacity: .38; pointer-events: none; }
 
-/* ---------- saat ızgarası ---------- */
+/* ---------- saat ızgarası (üye) ---------- */
 .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
 .slot {
   padding: 13px 4px; border-radius: var(--r-sm); cursor: pointer;
-  background: var(--surface); border: 1px solid var(--border-soft);
+  background: var(--surface); border: 1px solid var(--border);
   font: inherit; font-size: 15px; font-weight: 600; color: var(--text);
   font-variant-numeric: tabular-nums;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   transition: border-color .15s, background .15s, transform .12s;
 }
 .slot small { font-size: 10px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
-.slot:hover:not(.off) { border-color: var(--accent); background: var(--surface-2); }
+.slot:hover:not(.off) { border-color: var(--brand); background: var(--surface-2); }
 .slot:active:not(.off) { transform: scale(.97); }
 .slot.on {
-  background: linear-gradient(150deg, var(--accent), #2563EB);
+  background: linear-gradient(150deg, var(--brand), var(--brand-deep));
   border-color: transparent; color: #fff;
-  box-shadow: 0 2px 10px rgba(37,99,235,.24);
+  box-shadow: 0 2px 10px rgba(232,20,31,.22);
 }
-.slot.on small { color: rgba(255,255,255,.8); }
-.slot.off { opacity: .3; cursor: not-allowed; }
+.slot.on small { color: rgba(255,255,255,.82); }
+.slot.off { opacity: .42; cursor: not-allowed; background: var(--bg-soft); }
 .slot.off small { color: var(--muted); }
 
 /* ---------- anahtar (çift modu) ---------- */
 .switch {
   display: flex; align-items: center; gap: var(--sp-3);
-  background: var(--bg-soft); border: 1px solid var(--border);
+  background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r); padding: var(--sp-3) var(--sp-4);
   cursor: pointer; width: 100%; text-align: left; font: inherit; color: inherit;
 }
-.switch:hover { border-color: var(--surface-3); }
+.switch:hover { border-color: var(--brand-ring); }
 .switch .knob {
   flex: 0 0 44px; width: 44px; height: 26px; border-radius: 99px;
-  background: var(--surface-3); position: relative; transition: background .18s;
+  background: var(--surface-3); border: 1px solid var(--border);
+  position: relative; transition: background .18s;
 }
 .switch .knob::after {
-  content: ''; position: absolute; top: 3px; left: 3px;
+  content: ''; position: absolute; top: 2px; left: 2px;
   width: 20px; height: 20px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgba(26,23,28,.28);
   transition: transform .18s cubic-bezier(.2,.8,.2,1);
 }
-.switch.on .knob { background: var(--accent); }
+.switch.on .knob { background: var(--brand); border-color: var(--brand); }
 .switch.on .knob::after { transform: translateX(18px); }
 
 /* ---------- alt navigasyon ---------- */
@@ -315,9 +364,9 @@ p  { color: var(--text-2); }
   display: grid; grid-template-columns: repeat(4, 1fr);
   height: calc(var(--tab-h) + var(--safe-b));
   padding-bottom: var(--safe-b);
-  background: rgba(18,21,28,.92);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border-soft);
+  background: rgba(255,255,255,.90);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border);
 }
 .tab {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
@@ -325,140 +374,277 @@ p  { color: var(--text-2); }
   color: var(--muted); font: inherit; font-size: 10.5px; font-weight: 550;
   transition: color .15s;
 }
-.tab.on { color: var(--accent-2); }
+.tab.on { color: var(--brand); }
 .tab .dot {
   position: absolute; top: 9px; right: calc(50% - 17px);
-  width: 7px; height: 7px; border-radius: 50%; background: var(--bad);
-  border: 2px solid #12151C;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--brand);
+  border: 2px solid #fff;
 }
 
-/* ---------- bildirim ---------- */
+/* ---------- geçici bildirim ---------- */
 .toast {
   position: fixed; left: 50%; bottom: calc(var(--tab-h) + var(--safe-b) + 18px);
   transform: translate(-50%, 14px); z-index: 60;
   max-width: 400px; width: calc(100% - 40px);
-  background: var(--surface-3); color: var(--text);
-  border: 1px solid var(--border); border-radius: var(--r);
+  background: #26222A; color: #F7F4F6;
+  border: 1px solid rgba(255,255,255,.10); border-radius: var(--r);
   padding: 13px 16px; font-size: 13.5px; box-shadow: var(--shadow-lg);
   opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
-.toast.bad { border-color: rgba(248,113,113,.4); }
+.toast.bad { background: #4A1714; border-color: rgba(255,140,130,.32); }
 
 /* ---------- boş durum ---------- */
 .empty {
   display: flex; flex-direction: column; align-items: center; gap: var(--sp-3);
   padding: var(--sp-7) var(--sp-4); text-align: center;
   border: 1px dashed var(--border); border-radius: var(--r-lg); color: var(--muted);
+  background: var(--surface-2);
 }
 
-/* ---------- giriş ---------- */
+/* ---------- giriş alanları ---------- */
 .field { display: flex; flex-direction: column; gap: 7px; }
 .field label { font-size: 12px; font-weight: 600; color: var(--text-2); letter-spacing: .01em; }
 .field input, .field select, .field textarea {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
-  padding: 14px var(--sp-4); color: var(--text); font: inherit; font-size: 15px;
-  width: 100%; transition: border-color .15s;
+  padding: 13px var(--sp-4); color: var(--text); font: inherit; font-size: 15px;
+  width: 100%; transition: border-color .15s, box-shadow .15s;
 }
 .field input:focus, .field select:focus, .field textarea:focus {
-  outline: none; border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59,130,246,.16);
+  outline: none; border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-ring);
 }
-.field input::placeholder { color: var(--muted); }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); }
 
+/* Logo saydam PNG ve koyu çizimli: açık zeminde doğal olarak okunur.
+   Parıltı/blok hilesi YOK — yalnızca çevresinde boşluk. */
 .brand { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
-.brand img { width: 76px; height: 76px; border-radius: 22px; }
+.brand img { width: 76px; height: 76px; }
 
 .demohint {
-  background: rgba(34,211,238,.07); border: 1px dashed rgba(34,211,238,.3);
+  background: var(--brand-tint); border: 1px dashed var(--brand-ring);
   border-radius: var(--r); padding: var(--sp-3) var(--sp-4);
   font-size: 12.5px; color: var(--text-2);
 }
-.demohint b { color: var(--accent-2); font-weight: 600; }
+.demohint b { color: var(--brand); font-weight: 650; }
 
-/* ---------- yönetici ---------- */
+/* ================================================================== */
+/* Yönetici kabuğu                                                      */
+/* ================================================================== */
+
 .adminbar {
   position: sticky; top: 0; z-index: 15;
   display: flex; align-items: center; gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-5);
-  background: rgba(20,24,31,.94); backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-soft);
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
   margin: calc(var(--sp-5) * -1) calc(var(--sp-5) * -1) 0;
   flex-wrap: wrap;
 }
-.adminbar .logo { width: 30px; height: 30px; border-radius: 9px; }
+.adminbar .logo { width: 30px; height: 30px; }
 .adminbar nav { display: flex; gap: 3px; flex-wrap: wrap; }
 .adminbar nav a {
   padding: 7px 13px; border-radius: 9px; cursor: pointer;
   font-size: 12.5px; font-weight: 600; color: var(--text-2);
+  transition: background .14s, color .14s;
 }
-.adminbar nav a:hover { background: var(--surface-2); color: var(--text); }
-.adminbar nav a.on { background: var(--surface-3); color: var(--text); }
+.adminbar nav a:hover { background: var(--surface-3); color: var(--text); }
+.adminbar nav a.on { background: var(--brand-tint); color: var(--brand); }
 
+/* Bordürlü kaydırma paneli — takvim ve üye tablosu bunu paylaşır */
 .weekgrid {
-  overflow-x: auto; border: 1px solid var(--border-soft);
-  border-radius: var(--r); background: var(--bg-soft);
+  overflow-x: auto; border: 1px solid var(--border);
+  border-radius: var(--r); background: var(--surface);
+  box-shadow: var(--shadow);
 }
-.weekgrid table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 12px; }
-.weekgrid th, .weekgrid td {
-  border-bottom: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft);
-  padding: 0; vertical-align: top;
-}
-.weekgrid thead th {
-  position: sticky; top: 0; z-index: 2; background: var(--surface-2);
-  padding: 9px 6px; font-size: 11px; font-weight: 650; color: var(--text-2);
-  text-align: center; letter-spacing: .03em;
-}
-.weekgrid thead th.today { color: var(--accent); }
-.weekgrid thead th.today span { color: var(--accent); }
-.weekgrid thead th span { display: block; font-size: 16px; color: var(--text); font-weight: 700; }
-.weekgrid tbody th {
-  width: 54px; background: var(--bg-soft); color: var(--muted);
-  font-size: 11px; font-weight: 600; padding: 6px; text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-.weekgrid td.dayoff { background: rgba(0,0,0,.16); }
-.weekgrid td.now { box-shadow: inset 0 2px 0 var(--accent); }
 
-.cell { min-height: 42px; padding: 3px; display: flex; flex-direction: column; gap: 2px; }
-.cell.drop { background: rgba(59,130,246,.14); outline: 1px dashed var(--accent); outline-offset: -2px; }
-.cell.nodrop { background: rgba(248,113,113,.10); outline: 1px dashed var(--bad); outline-offset: -2px; }
+/* ================================================================== */
+/* Takvim — GÜN / HAFTA                                                 */
+/* ================================================================== */
+
+/* Sütun genişliği İÇERİKTEN BAĞIMSIZ olmalı. table-layout:fixed ile
+   sütunlar yalnızca ilk satırdaki genişliklerden hesaplanır; hücre içeriği
+   sütunu genişletemez. Saat sütunu sabit, kalan alan 7 güne eşit bölünür. */
+.cal table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+.cal.cal--week table { min-width: 780px; }
+.cal.cal--day  table { min-width: 320px; }
+
+.cal th, .cal td {
+  border-bottom: 1px solid var(--border-soft);
+  border-right: 1px solid var(--border-soft);
+  padding: 0; vertical-align: top;
+  overflow: hidden;          /* içerik taşsa bile sütunu etkilemez */
+}
+.cal td:last-child, .cal th:last-child { border-right: none; }
+
+.cal thead th {
+  position: sticky; top: 0; z-index: 2; background: var(--bg-soft);
+  padding: 9px 6px; font-size: 11px; font-weight: 650; color: var(--text-2);
+  text-align: center; letter-spacing: .04em; text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.cal thead th span { display: block; font-size: 16px; color: var(--text); font-weight: 700; letter-spacing: -.02em; }
+.cal thead th.today { color: var(--brand); }
+.cal thead th.today span { color: var(--brand); }
+
+/* Saat sütunu — hem başlıkta hem gövdede aynı sabit genişlik */
+.cal thead th:first-child,
+.cal tbody th { width: var(--time-col); }
+.cal tbody th {
+  background: var(--bg-soft); color: var(--muted);
+  font-size: 11px; font-weight: 600; padding: 6px 4px; text-align: center;
+  font-variant-numeric: tabular-nums;
+  border-right: 1px solid var(--border);
+}
+
+.cal td.dayoff { background: repeating-linear-gradient(0deg, var(--bg-soft), var(--bg-soft)); }
+.cal td.now { box-shadow: inset 0 2px 0 var(--brand); }
+
+/* ---------- hücre: randevu yerleşimini HÜCRE belirler ---------- */
+/* Satır yüksekliği sabittir. Aynı saatte 1–4 randevu olması satırı
+   uzatmaz; kartlar hücrenin içinde şerit/2×2 düzenine geçer. */
+.cell {
+  height: var(--slot-h);
+  padding: 3px;
+  display: grid;
+  gap: 3px;
+  grid-template-columns: 1fr;
+  grid-auto-rows: 1fr;
+  min-width: 0;
+}
+.cal--day .cell { height: calc(var(--slot-h) * 1.5); }
+
+/* iki randevu → iki iç şerit */
+.cell[data-n="2"] { grid-template-rows: 1fr 1fr; }
+/* üç–dört randevu → kompakt 2×2 */
+.cell[data-n="3"], .cell[data-n="4"] { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
+/* Ekleme şeridi: tek/çift randevuda ince dikey rayda durur, böylece
+   randevu kartı hücreyi neredeyse tamamen kullanır. 3'te 2×2'nin boş
+   gözüne düşer, 4'te zaten kapasite dolu. */
+.cell[data-n="1"].can-add { grid-template-columns: 1fr 20px; }
+.cell[data-n="2"].can-add { grid-template-columns: 1fr 20px; }
+.cell[data-n="2"].can-add .emptyslot { grid-row: 1 / 3; grid-column: 2; }
+
+.cell.drop   { background: var(--ems-tint); outline: 2px dashed var(--ems); outline-offset: -2px; }
+.cell.nodrop { background: var(--bad-tint); outline: 2px dashed var(--bad); outline-offset: -2px; }
 
 .appt {
-  border-radius: 8px; padding: 6px 8px; cursor: grab;
-  background: var(--surface-2);
-  border: 1px solid var(--border-soft);
-  border-left: 3px solid #5B8DEF;
-  box-shadow: 0 1px 2px rgba(0,0,0,.28);
-  font-size: 11px; line-height: 1.35; text-align: left; width: 100%;
+  position: relative;
+  border-radius: 7px; padding: 4px 7px; cursor: grab;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ems);
+  box-shadow: 0 1px 2px rgba(26,23,28,.06);
+  font-size: 11px; line-height: 1.3; text-align: left;
   color: inherit; font-family: inherit;
-  transition: transform .1s, opacity .15s, background .15s;
+  min-width: 0; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  transition: transform .1s, box-shadow .15s, border-color .15s;
 }
-.appt:hover { background: var(--surface-3); border-color: var(--border); }
+.appt:hover { box-shadow: var(--shadow-md); border-color: var(--brand-ring); z-index: 3; }
 .appt:active { cursor: grabbing; }
-.appt b { display: block; font-weight: 600; font-size: 12px; color: var(--text); letter-spacing: -.01em; }
-.appt em { font-style: normal; color: var(--text-2); font-size: 10px; letter-spacing: .02em; }
-.appt.fitness { border-left-color: #4BA8B8; }
-/* Çift seansı özel kalmalı ama bağırmamalı: sıcak kenar + çok hafif zemin. */
-.appt.couple {
-  border-left-color: #C99A4A;
-  background: linear-gradient(100deg, rgba(201,154,74,.10), var(--surface-2) 58%);
+/* Ad ve hizmet asla sütunu genişletemez: tek satır + üç nokta */
+.appt b, .appt em {
+  display: block; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.appt.cut { opacity: .4; border-style: dashed; }
-.appt.past { opacity: .5; }
+.appt b { font-weight: 650; font-size: 11.5px; color: var(--text); letter-spacing: -.01em; }
+.appt em { font-style: normal; color: var(--muted); font-size: 10px; letter-spacing: .02em; }
+
+.appt.fitness { border-left-color: var(--fitness); }
+/* Çift seansı özel kalmalı ama bağırmamalı: sıcak kehribar kenar + çok hafif zemin */
+.appt.couple {
+  border-left-color: var(--couple);
+  background: linear-gradient(100deg, rgba(176,124,27,.09), var(--surface) 60%);
+}
+.appt.closed {
+  border-left-color: var(--bad); background: var(--bad-tint);
+  cursor: pointer; opacity: .8;
+}
+.appt.cut { opacity: .45; border-style: dashed; }
+.appt.past { opacity: .55; }
 .appt.dragging { opacity: .35; }
 
+/* Yoğun hücrede satır sayısı düşürülür; hizmet rengi sol kenarda okunur
+   kalır (efsane başlıkta). Yoğunluk pratik kalsın diye ad öncelikli. */
+.cal--week .cell[data-n="3"] .appt em,
+.cal--week .cell[data-n="4"] .appt em { display: none; }
+.cal--week .cell[data-n="3"] .appt,
+.cal--week .cell[data-n="4"] .appt { padding: 2px 5px; border-left-width: 3px; }
+.cal--week .cell[data-n="3"] .appt b,
+.cal--week .cell[data-n="4"] .appt b { font-size: 10.5px; }
+
 .emptyslot {
-  border: 1px solid transparent; border-radius: 7px;
-  min-height: 34px; cursor: pointer;
-  background: rgba(255,255,255,.022);
+  border: 1px dashed transparent; border-radius: 6px;
+  cursor: pointer; min-width: 0;
+  background: var(--bg-soft);
   transition: background .12s, border-color .12s;
 }
-.emptyslot:hover { background: rgba(59,130,246,.10); border-color: rgba(59,130,246,.35); }
+.emptyslot:hover { background: var(--brand-tint); border-color: var(--brand-ring); }
 
+/* ================================================================== */
+/* Takvim — AY (yalnızca genel bakış)                                   */
+/* ================================================================== */
+
+.monthgrid {
+  border: 1px solid var(--border); border-radius: var(--r);
+  background: var(--surface); box-shadow: var(--shadow); overflow: hidden;
+}
+.monthhead, .monthbody { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.monthhead > span {
+  padding: 9px 6px; text-align: center; background: var(--bg-soft);
+  font-size: 11px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--text-2); border-bottom: 1px solid var(--border);
+}
+.mday {
+  min-height: 92px; min-width: 0;
+  border-right: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft);
+  background: var(--surface); cursor: pointer;
+  font: inherit; color: inherit; text-align: left;
+  padding: 7px 8px;
+  display: flex; flex-direction: column; gap: 5px;
+  transition: background .14s;
+}
+.mday:nth-child(7n) { border-right: none; }
+.mday:hover { background: var(--surface-3); }
+/* align-self olmadan esnek kapsayıcıda tam genişliğe uzar; bugünün
+   yuvarlağı elips gibi görünüyordu. */
+.mday .num {
+  align-self: flex-start;
+  font-size: 13.5px; font-weight: 650; color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.mday.other { background: var(--bg-soft); }
+.mday.other .num { color: var(--muted); font-weight: 500; }
+.mday.today .num {
+  display: inline-grid; place-items: center; min-width: 23px; height: 23px;
+  border-radius: 50%; background: var(--brand); color: #fff;
+}
+.mday.closed { background: repeating-linear-gradient(135deg, var(--bg-soft) 0 6px, var(--surface-2) 6px 12px); }
+.mstats { display: flex; flex-direction: column; gap: 3px; }
+.mstat {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 600; color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.mstat i { width: 6px; height: 6px; border-radius: 2px; flex: 0 0 6px; }
+.mstat.ems i { background: var(--ems); }
+.mstat.fit i { background: var(--fitness); }
+.mstat.cpl { color: var(--couple); }
+.mstat.cpl i { background: var(--couple); border-radius: 50%; }
+.mday .quiet { font-size: 10.5px; color: var(--muted); }
+
+/* ---------- bağlam menüsü ---------- */
 .ctxmenu {
   position: fixed; z-index: 200; min-width: 190px;
-  background: var(--surface-2); border: 1px solid var(--border);
+  background: var(--surface); border: 1px solid var(--border);
   border-radius: 12px; padding: 5px; box-shadow: var(--shadow-lg);
 }
 .ctxmenu button {
@@ -468,29 +654,27 @@ p  { color: var(--text-2); }
 }
 .ctxmenu button:hover { background: var(--surface-3); }
 .ctxmenu button.danger { color: var(--bad); }
-.ctxmenu hr { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+.ctxmenu hr { border: none; border-top: 1px solid var(--border-soft); margin: 4px 0; }
 
-.sheet {
-  position: fixed; inset: 0; z-index: 100;
-  background: rgba(4,6,10,.72); backdrop-filter: blur(6px);
-  display: flex; align-items: flex-end; justify-content: center;
-  animation: fade .18s;
-}
-/* Eski tek-parça panel kuralı kaldırıldı: .sheetbox/.sheetbody ikilisi
-   onun yerini aldı. Bıraksaydık max-height:88dvh masaüstü çekmecesinin
-   top+bottom hesabını ezip paneli 19px taşırıyordu. */
-@keyframes fade { from { opacity: 0 } to { opacity: 1 } }
-@keyframes slideup { from { transform: translateY(24px) } to { transform: none } }
-
+/* ---------- tablolar ---------- */
 .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tbl th, .tbl td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border-soft); }
-.tbl th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
-.tbl tbody tr { cursor: pointer; }
-.tbl tbody tr:hover { background: var(--surface-2); }
+.tbl th, .tbl td { padding: 11px 12px; text-align: left; border-bottom: 1px solid var(--border-soft); }
+.tbl th {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); font-weight: 650; background: var(--bg-soft);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.tbl td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tbl th.num { text-align: right; }
+.tbl tbody tr { cursor: pointer; transition: background .12s; }
+.tbl tbody tr:nth-child(even) { background: var(--surface-2); }
+.tbl tbody tr:hover { background: var(--brand-tint); }
+.tbl tbody tr:last-child td { border-bottom: none; }
+.tbl .sub { display: block; font-size: 11px; color: var(--muted); }
 
 .demofoot {
   margin-top: var(--sp-5); padding-top: var(--sp-4);
-  border-top: 1px solid var(--border-soft);
+  border-top: 1px solid var(--border);
   font-size: 11.5px; color: var(--muted); text-align: center;
 }
 
@@ -507,10 +691,10 @@ p  { color: var(--text-2); }
   top: calc(var(--safe-t) + 10px); right: 12px;
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 9px; border-radius: 999px;
-  background: rgba(21,25,34,.82); backdrop-filter: blur(10px);
-  border: 1px solid var(--border-soft);
+  background: rgba(255,255,255,.86); backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
   font-size: 10.5px; font-weight: 600; color: var(--muted);
-  pointer-events: none; opacity: .85;
+  pointer-events: none;
 }
 .syncdot i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .syncdot.ok   { color: var(--ok); }
@@ -523,25 +707,41 @@ p  { color: var(--text-2); }
 /* ---------- bildirim kurulum kartı ---------- */
 .pushcard {
   display: flex; align-items: center; gap: var(--sp-3);
-  background: var(--bg-soft); border: 1px solid var(--border);
+  background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r); padding: var(--sp-3) var(--sp-4);
+  box-shadow: var(--shadow);
 }
 .pushcard .ico {
   display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px;
-  border-radius: 12px; background: rgba(59,130,246,.13); color: var(--accent-2);
+  border-radius: 12px; background: var(--brand-tint); color: var(--brand);
 }
-.pushcard.on { border-color: rgba(52,211,153,.3); background: rgba(52,211,153,.06); }
-.pushcard.on .ico { background: rgba(52,211,153,.13); color: var(--ok); }
+.pushcard.on { border-color: rgba(31,148,84,.32); background: var(--ok-tint); }
+.pushcard.on .ico { background: rgba(31,148,84,.14); color: var(--ok); }
 
 /* ================================================================== */
-/* Yönetim paneli — masaüstünde sağ çekmece, mobilde alt sayfa          */
+/* Panel sistemi — ÜÇ bilinçli desen                                    */
+/*   A) .sheet--modal  → takvim randevusu / boş seans → ORTALI kip      */
+/*   B) .sheet--drawer → üye detayı → SAĞDA YÜZEN panel                 */
+/*   C) mobil (<900px) → her ikisi de alt sayfa                         */
 /* ================================================================== */
+
+.sheet {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(40,30,34,.38);
+  display: flex;
+  animation: fade .18s;
+}
+@keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideup { from { transform: translateY(24px) } to { transform: none } }
+@keyframes slidein { from { transform: translateX(20px); opacity: .6 } to { transform: none; opacity: 1 } }
+@keyframes pop { from { transform: scale(.97); opacity: .7 } to { transform: none; opacity: 1 } }
 
 .sheetbox {
   position: relative;
   display: flex; flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
 }
 .sheetbody {
   display: flex; flex-direction: column; gap: var(--sp-3);
@@ -550,114 +750,136 @@ p  { color: var(--text-2); }
   overscroll-behavior: contain;
 }
 .sheetclose {
-  position: absolute; z-index: 2; top: 12px; right: 12px;
-  display: grid; place-items: center; width: 34px; height: 34px;
-  border-radius: 10px; border: 1px solid var(--border);
-  background: var(--surface-2); color: var(--text-2);
+  position: absolute; z-index: 3; top: 13px; right: 13px;
+  display: grid; place-items: center; width: 32px; height: 32px;
+  border-radius: 9px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-2);
   cursor: pointer; transition: background .15s, color .15s;
 }
 .sheetclose:hover { background: var(--surface-3); color: var(--text); }
+.sheetclose svg { width: 17px; height: 17px; }
 
-/* Panelin altına sabitlenen birincil eylem alanı.
-   Arka plan TAM OPAK: yarı saydam olduğunda altındaki önizleme metni
-   düğmelerin arasından okunuyordu. İçeriğe ayrıca alt boşluk verilir ki
-   son bölüm bu alanın altında sıkışmadan yukarı kaydırılabilsin. */
+/* Yapışkan başlık — kaydırırken kimlik kaybolmasın.
+   ÜST BOŞLUK SIFIR olmalı: negatif üst boşluk verildiğinde başlık yapışma
+   sınırının yukarısına yerleşiyor, sticky onu hemen aşağı itiyor ve altındaki
+   ilk satırın üstüne biniyordu (ölçülen örtüşme: 10px). Gövdenin üst dolgusunu
+   bu yüzden başlığın kendi dolgusu üstlenir. */
+.sheethead {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--surface);
+  margin: 0 calc(var(--sp-5) * -1) 0;
+  padding: var(--sp-4) 56px var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.sheethead .row { gap: var(--sp-2); }
+
+/* Yapışkan eylem alanı. Arka plan TAM OPAK: yarı saydam olduğunda altındaki
+   metin düğmelerin arasından okunuyordu. Alt boşluk sıfır, yoksa kaydırma
+   alanının dibinde açıklık kalıp arkadaki içerik sızıyor. */
 .sheetfoot {
   position: sticky; bottom: 0; z-index: 2;
-  /* Yatayda tam genişlik, altta SIFIR: negatif alt boşluk bırakıldığında
-     kaydırma alanının dibinde 24px açık kalıyor ve arkadaki metin sızıyordu. */
   margin: var(--sp-3) calc(var(--sp-5) * -1) 0;
   padding: var(--sp-3) var(--sp-5) calc(var(--sp-4) + var(--safe-b));
   background: var(--surface);
   border-top: 1px solid var(--border);
-  box-shadow: 0 -10px 20px -12px rgba(0,0,0,.55);
+  box-shadow: 0 -10px 20px -14px rgba(26,23,28,.35);
   display: flex; flex-direction: column; gap: 8px;
 }
-/* Son içerik bloğu yapışkan alanın altında kalmasın */
+/* Son içerik bloğu yapışkan alanın altında sıkışmasın */
 .sheetbody:has(.sheetfoot) > *:nth-last-child(2) { margin-bottom: var(--sp-2); }
 
-/* ---------- mobil / tablet: alt sayfa ---------- */
+/* Yıkıcı eylem görsel olarak ayrılır */
+.dangerzone {
+  margin-top: var(--sp-2); padding-top: var(--sp-3);
+  border-top: 1px solid var(--border-soft);
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+/* ---------- C) mobil / tablet: alt sayfa ---------- */
 @media (max-width: 899px) {
-  .sheet {
-    align-items: flex-end; justify-content: center;
-    background: rgba(6,8,12,.66);
-    backdrop-filter: blur(4px);
-  }
+  .sheet { align-items: flex-end; justify-content: center; backdrop-filter: blur(3px); }
   .sheetbox {
-    /* Masaüstündeki ile aynı gerekçe: bottom sabitlenir, yükseklik türetilir.
-       Esnek yerleşimle hizalandığında iç dolgular yüzünden 24px taşıyordu. */
+    /* Alt kenara sabitlenir, yükseklik içerikten gelir ama görünüm alanıyla
+       SINIRLIDIR. Masaüstü çekmece geometrisi mobile taşınmaz. */
     position: fixed; left: 0; right: 0; bottom: 0;
-    width: 100%; max-width: 520px; margin: 0 auto;
-    max-height: 88dvh;
+    width: 100%; max-width: 560px; margin: 0 auto;
+    max-height: calc(100dvh - var(--safe-t) - 32px);
     border-radius: var(--r-xl) var(--r-xl) 0 0;
     border-bottom: none;
     animation: slideup .26s cubic-bezier(.2,.8,.2,1);
   }
-  .sheetbody {
-    padding: var(--sp-5) var(--sp-5) calc(var(--sp-5) + var(--safe-b));
-  }
+  .sheetbody { padding: var(--sp-5) var(--sp-5) calc(var(--sp-5) + var(--safe-b)); }
   .sheetbody:has(.sheetfoot) { padding-bottom: 0; }
+  .sheethead { border-radius: var(--r-xl) var(--r-xl) 0 0; }
 }
 
-/* ---------- masaüstü: sağ çekmece ---------- */
+/* ---------- A) masaüstü: ORTALI kip ---------- */
 @media (min-width: 900px) {
-  /* Takvim görünür kalır; çekmece üstüne değil yanına oturur. */
-  .sheet {
-    align-items: stretch; justify-content: flex-end;
-    background: rgba(6,8,12,.42);
-    backdrop-filter: none;
+  .sheet--modal { align-items: center; justify-content: center; padding: 32px; }
+  .sheet--modal .sheetbox {
+    /* Sonlu ölçüler: genişlik ve yükseklik ikisi de sınırlı. */
+    width: min(600px, calc(100vw - 40px));
+    max-height: calc(100dvh - 64px);
+    border-radius: var(--r-xl);
+    animation: pop .2s cubic-bezier(.2,.8,.2,1);
   }
-  .sheetbox {
-    /* Doğrudan konumlandırma: top + bottom birlikte verildiği için yükseklik
-       görünüm alanından TÜRETİLİR. Hesaplanan yükseklik yok, sabit piksel yok
-       → tarayıcı çubuğu/dock ekranı kısaltsa bile taşma matematiksel olarak
-       imkânsız. (Esnek yerleşimle konumlandırıldığında 19px taşıyordu.) */
+  .sheet--modal .sheetbody { padding: var(--sp-5); }
+  .sheet--modal .sheetbody:has(.sheetfoot) { padding-bottom: 0; }
+  .sheet--modal .sheethead { border-radius: var(--r-xl) var(--r-xl) 0 0; }
+
+  /* ---------- B) masaüstü: SAĞDA YÜZEN panel ---------- */
+  /* Ekran kenarlarına YAPIŞMAZ. top+bottom birlikte verildiği için yükseklik
+     görünüm alanından TÜRETİLİR — sabit yükseklik, 88dvh hilesi ya da sihirli
+     üst piksel yok. Üst çapa ölçülür (--admin-head), varsayılmaz. */
+  .sheet--drawer { align-items: stretch; justify-content: flex-end; background: rgba(40,30,34,.26); }
+  .sheet--drawer .sheetbox {
     position: fixed;
-    top: var(--admin-head, 56px);
-    bottom: 0;
-    right: 0;
-    width: min(460px, 92vw);
-    border-radius: var(--r-lg) 0 0 0;
-    border-right: none;
-    box-shadow: -18px 0 44px rgba(0,0,0,.42);
+    top: calc(var(--admin-head, 56px) + 18px);
+    right: 22px;
+    bottom: 22px;
+    width: min(440px, calc(100vw - 44px));
+    border-radius: var(--r-xl);
     animation: slidein .24s cubic-bezier(.2,.8,.2,1);
   }
-  .sheetbody {
-    flex: 1;
-    padding: var(--sp-5) var(--sp-5) var(--sp-5);
-  }
-  /* Alt eylem alanı varsa dip dolgusunu o üstlenir */
-  .sheetbody:has(.sheetfoot) { padding-bottom: 0; }
-  .sheetbody > .row:first-child { padding-right: 40px; }  /* kapatma düğmesine yer */
+  .sheet--drawer .sheetbody { flex: 1; padding: var(--sp-5); }
+  .sheet--drawer .sheetbody:has(.sheetfoot) { padding-bottom: 0; }
+  .sheet--drawer .sheethead { border-radius: var(--r-xl) var(--r-xl) 0 0; }
 }
 
-@keyframes slidein { from { transform: translateX(24px); opacity: .6 } to { transform: none; opacity: 1 } }
-
-/* Kısa masaüstü ekranlarda başlık da kaymasın */
+/* Kısa masaüstü ekranlarda yalnızca DOLGULAR sıkışır.
+   Çekmecenin kenar boşluklarına dokunulmaz: yüksekliği zaten top+bottom'dan
+   türediği için ekran kısaldıkça panel kendiliğinden kısalır, taşamaz. */
 @media (min-width: 900px) and (max-height: 720px) {
   .sheetbody { padding-top: var(--sp-4); }
   .sheetfoot { padding-bottom: var(--sp-3); }
 }
 
-/* ---------- bildirim önizlemesi (telefon görünümü) ---------- */
+/* ---------- bildirim önizlemesi (kilit ekranı görünümü) ---------- */
+/* Bilerek koyu: bu uygulamanın teması değil, telefon kilit ekranının maketi. */
 .notifpreview {
   display: flex; gap: 10px; align-items: flex-start;
-  background: rgba(255,255,255,.055);
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #322C31, #26222A);
+  border: 1px solid rgba(255,255,255,.10);
   border-radius: 16px; padding: 11px 13px;
+  box-shadow: var(--shadow-md);
 }
-.notifpreview img { width: 26px; height: 26px; border-radius: 7px; flex: 0 0 26px; }
+.notifpreview img { width: 26px; height: 26px; border-radius: 7px; flex: 0 0 26px; background: #fff; }
 .notifpreview .app {
   display: block; font-size: 10.5px; font-weight: 600;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--muted);
+  letter-spacing: .04em; text-transform: uppercase; color: rgba(255,255,255,.55);
 }
 .notifpreview b {
   display: block; font-size: 13.5px; font-weight: 600;
-  color: var(--text); margin-top: 2px; word-break: break-word;
+  color: #fff; margin-top: 2px; word-break: break-word;
 }
 .notifpreview p {
-  font-size: 12.5px; color: var(--text-2); margin-top: 1px;
+  font-size: 12.5px; color: rgba(255,255,255,.74); margin-top: 1px;
   word-break: break-word; white-space: pre-wrap;
 }
+
+/* Yapışkan başlık varsa gövdenin üst dolgusu başlığa devredilir. Dosyanın
+   sonunda durur ki mobil / ortalı kip / çekmece dolgularının hepsini ezsin. */
+.sheetbody:has(.sheethead) { padding-top: 0; }
 
 textarea { resize: vertical; min-height: 84px; font-family: var(--font); line-height: 1.5; }

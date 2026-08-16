@@ -136,7 +136,7 @@ export function home() {
           </div>`}
 
         ${bal.debt > 0 ? `
-          <div class="card" style="border-color:rgba(251,191,36,.3)">
+          <div class="card warn">
             <div class="row between">
               <div>
                 <p class="eyebrow" style="color:var(--warn)">ÖDEME</p>
@@ -284,7 +284,7 @@ export function book() {
           </button>
 
           <button class="choice" data-act="pickFitness">
-            <span class="ico" style="background:rgba(34,211,238,.13)">${icon.dumbbell}</span>
+            <span class="ico ems">${icon.dumbbell}</span>
             <span class="txt">
               <h3>Fitness</h3>
               <span class="small muted">Serbest çalışma seansı</span>
@@ -344,7 +344,7 @@ export function slots() {
           </button>` : ''}
 
         ${couple ? `
-          <div class="card flat" style="border-color:rgba(251,191,36,.3)">
+          <div class="card flat warn">
             <p class="eyebrow" style="color:var(--warn)">ÖZEL ÇİFT SEANSI</p>
             <p class="small">${esc(me.name.split(' ')[0])} + ${esc(partner.name.split(' ')[0])} — stüdyo
             bu seans boyunca yalnızca size ayrılır. Bu yüzden sadece tamamen boş saatler seçilebilir.</p>
@@ -583,7 +583,7 @@ export function profile() {
         <div class="card">
           <div class="row">
             <span class="ico" style="width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;
-                  border-radius:16px;background:rgba(59,130,246,.14);color:var(--accent-2)">${icon.user}</span>
+                  border-radius:16px;background:var(--brand-tint);color:var(--brand)">${icon.user}</span>
             <div class="grow">
               <h2>${esc(me.name)}</h2>
               <p class="small mono">${esc(me.memberNo)}</p>

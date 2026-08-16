@@ -27,6 +27,7 @@ export const fmt = {
   dayNum: (t) => parts(t).d,
   date: (t) => { const p = parts(t); return `${p.d} ${AY[p.m]}`; },
   full: (t) => { const p = parts(t); return `${p.d} ${AY[p.m]} ${GUN[p.dow]}`; },
+  monthYear: (t) => { const p = parts(t); return `${AY[p.m]} ${p.y}`; },
   money: (n) => new Intl.NumberFormat('tr-TR').format(n) + ' ₺',
   rel(t) {
     const gun = Math.round((startOfDay(t) - startOfDay(Date.now())) / 86_400_000);
@@ -43,6 +44,15 @@ export const startOfDay = (t) => {
 };
 
 export const sameDay = (a, b) => startOfDay(a) === startOfDay(b);
+
+/* Ay gezinmesi stüdyo saatinde yapılır. Date.UTC ay taşmasını kendisi
+   çözer (ay 12 → sonraki yılın Ocak'ı), elle yıl hesabı gerekmez. */
+const dateAt = (y, m, d) => Date.UTC(y, m, d) - OFF * MINUTE;
+export const monthStart = (t) => { const p = parts(t); return dateAt(p.y, p.m, 1); };
+export const addMonths = (t, n) => { const p = parts(t); return dateAt(p.y, p.m + n, 1); };
+/** Haftanın günü, 0 = Pazar (v0.5 haftası Pazartesi başlar; çeviri çağıranda). */
+export const dowOf = (t) => parts(t).dow;
+export const GUN_KISA_PZT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
 /* ---------- ikonlar ---------- */
 const P = (d, extra = '') =>
@@ -104,17 +114,23 @@ export function toast(msg, bad = false) {
 let sheetEl = null;
 
 /**
- * Yönetim paneli.
- * Masaüstünde sağdan açılan sabit yükseklikli çekmece, mobilde alt sayfa.
- * İkisi de aynı DOM'u kullanır; biçimi CSS seçer.
+ * Panel. Masaüstünde İKİ bilinçli desen vardır, mobilde ikisi de alt sayfadır:
  *
- * Kapatma düğmesi burada enjekte edilir — böylece her çağrı yerinde ayrı ayrı
- * yazılmasına gerek kalmaz ve hiçbir panelde kaybolmaz.
+ *   'modal'  → ekranın ORTASINDA sonlu kip. Takvim randevusu, boş seans,
+ *              manuel randevu, onay ve uyarı diyalogları.
+ *   'drawer' → sağda YÜZEN panel (kenarlara yapışmaz). Üye detayı gibi
+ *              listeyle yan yana okunmasında fayda olan içerikler.
+ *
+ * Varsayılan 'modal': diyalogların ezici çoğunluğu odak isteyen kısa
+ * etkileşimlerdir; çekmece bilinçli olarak istenmelidir.
+ *
+ * Kapatma düğmesi burada enjekte edilir — hiçbir panelde kaybolmasın diye.
  */
-export function sheet(html, onMount) {
+export function sheet(html, onMount, opts = {}) {
+  const variant = opts.variant === 'drawer' ? 'drawer' : 'modal';
   closeSheet();
   sheetEl = document.createElement('div');
-  sheetEl.className = 'sheet';
+  sheetEl.className = `sheet sheet--${variant}`;
   sheetEl.innerHTML = `
     <div class="sheetbox" role="dialog" aria-modal="true">
       <button class="sheetclose" data-sheet-close aria-label="Kapat">${icon.x}</button>
@@ -125,6 +141,24 @@ export function sheet(html, onMount) {
   });
   document.body.appendChild(sheetEl);
   onMount?.(sheetEl.querySelector('.sheetbody'));
+}
+
+/**
+ * Aynı panelin içeriğini değiştirir (üye çekmecesi → bildirim yazacı gibi).
+ * Üst üste ikinci bir çekmece açmamak için vardır.
+ *
+ * Gövde DÜĞÜMÜ baştan yaratılır, innerHTML'i değiştirilmez: önceki içeriğin
+ * gövdeye bağladığı dinleyiciler düğümle birlikte ölsün diye. Yoksa eski
+ * panelin tıklama dinleyicisi yeni içerikte de çalışırdı.
+ */
+export function swapSheet(html, onMount) {
+  const old = sheetEl?.querySelector('.sheetbody');
+  if (!old) return;
+  const body = document.createElement('div');
+  body.className = 'sheetbody';
+  body.innerHTML = html;
+  old.replaceWith(body);
+  onMount?.(body);
 }
 
 export function closeSheet() {
