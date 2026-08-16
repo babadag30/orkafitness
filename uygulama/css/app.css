@@ -495,3 +495,35 @@ p  { color: var(--text-2); }
   .admincols { display: grid; grid-template-columns: 1fr 340px; gap: var(--sp-5); align-items: start; }
 }
 @media (max-width: 899px) { .admincols { display: flex; flex-direction: column; gap: var(--sp-4); } }
+
+/* ---------- canlı senkron göstergesi ---------- */
+.syncdot {
+  position: fixed; z-index: 40;
+  top: calc(var(--safe-t) + 10px); right: 12px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 9px; border-radius: 999px;
+  background: rgba(21,25,34,.82); backdrop-filter: blur(10px);
+  border: 1px solid var(--border-soft);
+  font-size: 10.5px; font-weight: 600; color: var(--muted);
+  pointer-events: none; opacity: .85;
+}
+.syncdot i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.syncdot.ok   { color: var(--ok); }
+.syncdot.warn { color: var(--warn); }
+.syncdot.bad  { color: var(--bad); }
+/* Sunumda dikkat dağıtmasın: her şey yolundayken yalnızca nokta kalır */
+.syncdot.ok span { display: none; }
+.app.wide .syncdot { top: auto; bottom: 12px; right: 16px; }
+
+/* ---------- bildirim kurulum kartı ---------- */
+.pushcard {
+  display: flex; align-items: center; gap: var(--sp-3);
+  background: var(--bg-soft); border: 1px solid var(--border);
+  border-radius: var(--r); padding: var(--sp-3) var(--sp-4);
+}
+.pushcard .ico {
+  display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px;
+  border-radius: 12px; background: rgba(59,130,246,.13); color: var(--accent-2);
+}
+.pushcard.on { border-color: rgba(52,211,153,.3); background: rgba(52,211,153,.06); }
+.pushcard.on .ico { background: rgba(52,211,153,.13); color: var(--ok); }

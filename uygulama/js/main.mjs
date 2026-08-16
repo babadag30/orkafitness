@@ -4,6 +4,7 @@ import * as Store from './store.mjs';
 import * as A from './adapter.mjs';
 import * as M from './member.mjs';
 import * as Admin from './admin.mjs';
+import * as Sync from './sync.mjs';
 import { icon, toast, closeSheet, isSheetOpen } from './ui.mjs';
 
 const root = document.getElementById('app');
@@ -44,6 +45,20 @@ function tabsHtml(active) {
     </button>`).join('')}</nav>`;
 }
 
+/* Bağlantı göstergesi — üye arayüzünü kalabalıklaştırmayacak kadar küçük. */
+let syncStatus = Sync.Status.CONNECTING;
+const SYNC_LABEL = {
+  CONNECTING: ['Bağlanıyor', ''],
+  LIVE:       ['Canlı', 'ok'],
+  SYNCING:    ['Senkronize ediliyor', 'warn'],
+  ERROR:      ['Bağlantı sorunu', 'bad']
+};
+
+function syncBadge() {
+  const [label, cls] = SYNC_LABEL[syncStatus] ?? SYNC_LABEL.CONNECTING;
+  return `<div class="syncdot ${cls}" title="${label}"><i></i><span>${label}</span></div>`;
+}
+
 export function render() {
   const { name, params } = parseHash();
   const session = Store.get().session;
@@ -58,7 +73,7 @@ export function render() {
   current = { name, screen };
 
   root.classList.toggle('wide', !!screen.wide);
-  root.innerHTML = screen.html + tabsHtml(screen.tabs);
+  root.innerHTML = screen.html + tabsHtml(screen.tabs) + syncBadge();
   document.querySelector('.view')?.scrollTo?.(0, 0);
   window.scrollTo(0, 0);
   screen.after?.();
@@ -241,11 +256,56 @@ document.addEventListener('keydown', (e) => {
 /* Açılış                                                               */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/* Paylaşılan durum                                                     */
+/* ------------------------------------------------------------------ */
+
+Store.attachSync(Sync, {
+  onRemoteState: () => render(),
+  onMutationError: (r) => {
+    if (r?.conflict) {
+      toast('Bu sırada başka bir cihaz değişiklik yaptı. Güncel hâli aldık, tekrar dene.', true);
+    } else {
+      toast(r?.error ?? 'Demo bağlantısı kurulamadı. Tekrar deneyin.', true);
+    }
+  }
+});
+
 if (!location.hash) {
   const s = Store.get().session;
   location.replace(s ? (s.role === 'ADMIN' ? '#/admin' : '#/home') : '#/login');
 }
-render();
+
+root.innerHTML = `<div class="view" style="justify-content:center;align-items:center;gap:14px">
+  <img src="assets/logo.png" alt="" width="64" height="64" style="border-radius:18px;opacity:.9">
+  <p class="small muted">Demo durumu yükleniyor…</p></div>`;
+
+Sync.init({
+  seed: Store.demoSeed,
+  onState: (state) => { Store.applyRemoteState(state); },
+  onStatus: (s) => { syncStatus = s; paintSyncBadge(); }
+}).then(() => render()).catch(() => {
+  syncStatus = Sync.Status.ERROR;
+  render();
+  toast('Demo bağlantısı kurulamadı. Tekrar deneyin.', true);
+});
+
+function paintSyncBadge() {
+  const el = document.querySelector('.syncdot');
+  if (!el) return;
+  const [label, cls] = SYNC_LABEL[syncStatus] ?? SYNC_LABEL.CONNECTING;
+  el.className = `syncdot ${cls}`;
+  el.title = label;
+  el.querySelector('span').textContent = label;
+}
+
+/* Bildirime dokununca ilgili ekrana git */
+navigator.serviceWorker?.addEventListener?.('message', (e) => {
+  if (e.data?.type === 'NAVIGATE' && typeof e.data.target === 'string') {
+    const hash = e.data.target.split('#')[1];
+    if (hash) location.hash = hash;
+  }
+});
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').then(reg => {

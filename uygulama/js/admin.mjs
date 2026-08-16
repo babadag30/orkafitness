@@ -561,7 +561,16 @@ export function adminSettings() {
     `),
     actions: {
       signout() { Store.signOut(); location.hash = '#/login'; },
-      resetDemo() { Store.reset(); toast('Demo verisi sıfırlandı.'); rerender(); }
+      resetDemo() {
+        sheet(`
+          <h2>Demoyu sıfırla</h2>
+          <p class="small">Paylaşılan demo verisi başlangıç durumuna döner —
+          <b>bağlı tüm cihazlarda</b>. Web Push abonelikleri korunur.</p>
+          <button class="btn btn--danger" data-act="confirmReset">EVET, SIFIRLA</button>
+          <button class="btn btn--ghost" data-act="closeSheet">VAZGEÇ</button>`);
+      },
+      confirmReset() { Store.reset(); closeSheet(); toast('Demo verisi sıfırlandı.'); rerender(); },
+      closeSheet
     }
   };
 }

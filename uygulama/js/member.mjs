@@ -7,6 +7,7 @@
 import { ServiceType, BookingMode, Actor, AttendanceStatus } from '../../domain/index.mjs';
 import * as Store from './store.mjs';
 import * as A from './adapter.mjs';
+import * as Push from './push.mjs';
 import { esc, fmt, icon, topbar, pill, empty, toast, sheet, closeSheet, startOfDay } from './ui.mjs';
 
 /** Devam eden randevu taslağı. */
@@ -145,6 +146,15 @@ export function home() {
             </div>
           </div>` : ''}
 
+        <div class="pushcard" id="pushcard" data-act="pushSetup">
+          <span class="ico">${icon.bell}</span>
+          <span class="grow">
+            <b style="font-size:13.5px" id="pushlabel">Bildirimler</b>
+            <span class="small muted" style="display:block" id="pushhint">Durum kontrol ediliyor…</span>
+          </span>
+          <span class="btn btn--secondary compact" id="pushbtn" style="display:none">AÇ</span>
+        </div>
+
         <div class="stack tight">
           <div class="row between">
             <h2>Yaklaşan randevular</h2>
@@ -154,8 +164,49 @@ export function home() {
             ? upcoming.slice(0, 3).map(a => apptCard(a, me.id)).join('')
             : empty('Yaklaşan randevu yok', 'Randevu Al ile başlayabilirsin.')}
         </div>
-      </div>`
+      </div>`,
+    after() { paintPush(me.id); },
+    actions: {
+      async pushSetup() {
+        const st = await Push.status();
+        if (st === Push.State.ON) {
+          const r = await Push.test(me.id);
+          return toast(r?.sent ? 'Test bildirimi gönderildi.' : 'Bildirim gönderilemedi.', !r?.sent);
+        }
+        if (st === Push.State.NEEDS_INSTALL) {
+          return toast('Önce Paylaş → Ana Ekrana Ekle, sonra ana ekrandan aç.', true);
+        }
+        const r = await Push.enable(me.id);
+        toast(r.message, !r.ok);
+        paintPush(me.id);
+      }
+    }
   };
+}
+
+/** Bildirim durumunu ekrana yazar. İzin İSTEMEZ — yalnızca kullanıcı dokununca istenir. */
+async function paintPush(memberId) {
+  const card = document.getElementById('pushcard');
+  if (!card) return;
+  const st = await Push.status();
+  const label = document.getElementById('pushlabel');
+  const hint = document.getElementById('pushhint');
+  const btn = document.getElementById('pushbtn');
+
+  label.textContent = Push.LABEL[st] ?? 'Bildirimler';
+  card.classList.toggle('on', st === Push.State.ON);
+
+  const HINT = {
+    ON: 'Randevu değişikliklerinde haber vereceğiz · dokun: test bildirimi',
+    OFF: 'Randevun taşınırsa telefonuna bildirim gelsin',
+    DENIED: 'iPhone Ayarlar → Bildirimler’den açabilirsin',
+    NEEDS_INSTALL: 'Paylaş → Ana Ekrana Ekle, sonra ana ekrandan aç',
+    UNSUPPORTED: 'Bu tarayıcı web bildirimlerini desteklemiyor',
+    NOT_CONFIGURED: 'Bildirim sunucusu hazırlanıyor'
+  };
+  hint.textContent = HINT[st] ?? '';
+  btn.style.display = st === Push.State.OFF ? '' : 'none';
+  btn.textContent = 'AÇ';
 }
 
 function heroCard(a, meId) {
@@ -585,7 +636,20 @@ export function profile() {
       </div>`,
     actions: {
       signout() { Store.signOut(); location.hash = '#/login'; },
-      resetDemo() { Store.reset(); toast('Demo verisi sıfırlandı.'); location.hash = '#/home'; }
+      resetDemo() {
+        sheet(`
+          <h2>Demoyu sıfırla</h2>
+          <p class="small">Paylaşılan demo verisi başlangıç durumuna döner —
+          <b>bağlı tüm cihazlarda</b>. Bildirim izinleri korunur.</p>
+          <button class="btn btn--danger" data-act="confirmReset">EVET, SIFIRLA</button>
+          <button class="btn btn--ghost" data-act="closeSheet">VAZGEÇ</button>`);
+      },
+      confirmReset() {
+        Store.reset(); closeSheet();
+        toast('Demo verisi sıfırlandı.');
+        location.hash = '#/home';
+      },
+      closeSheet
     }
   };
 }
@@ -595,7 +659,7 @@ export function profile() {
 /* ================================================================== */
 
 export function notifications() {
-  const list = Store.get().notifications;
+  const list = Store.notifications();
   Store.markRead();
   return {
     tabs: 'home',

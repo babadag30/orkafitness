@@ -58,10 +58,16 @@ export function check({ memberId, serviceType, bookingMode, startsAt }) {
 }
 
 /** Doğrular ve izin verilirse planı tek blokta uygular. */
-export function book({ memberId, serviceType, bookingMode, startsAt }) {
+export function book({ memberId, serviceType, bookingMode, startsAt, actorRole = 'MEMBER' }) {
   const r = check({ memberId, serviceType, bookingMode, startsAt });
   if (!r.allowed) return { ok: false, result: r };
-  const appt = Store.applyPlan(r.metadata.plan);
+
+  const memberIds = r.metadata.plan.participants.map(p => p.memberId);
+  const appt = Store.applyPlan(r.metadata.plan, {
+    type: 'BOOK_APPOINTMENT',
+    startsAt, serviceType, bookingMode, actorRole, memberIds,
+    memberNames: memberIds.map(id => Store.member(id)?.name.split(' ')[0]).filter(Boolean)
+  });
   return { ok: true, result: r, appointment: appt };
 }
 
@@ -124,7 +130,16 @@ export function checkCancel({ appointment, memberId, actor = Actor.MEMBER }) {
 export function cancel({ appointment, memberId, actor = Actor.MEMBER }) {
   const r = checkCancel({ appointment, memberId, actor });
   if (!r.allowed) return { ok: false, result: r };
-  Store.applyPlan(r.metadata.plan);
+  Store.applyPlan(r.metadata.plan, {
+    type: 'CANCEL_APPOINTMENT',
+    appointmentId: appointment.id,
+    startsAt: appointment.startsAt,
+    serviceType: appointment.serviceType,
+    bookingMode: appointment.bookingMode,
+    actorRole: actor,
+    // Yönetici iptalinde üyeye bildirim gider; üye kendi iptalinde gitmez.
+    memberIds: actor === Actor.ADMIN ? appointment.participants.map(p => p.memberId) : []
+  });
   return { ok: true, result: r };
 }
 
@@ -133,14 +148,18 @@ export function coupleToSingle({ appointment, removeMemberId }) {
     appointment, removeMemberId, ctx: slotCtx(appointment.startsAt)
   });
   if (!r.allowed) return { ok: false, result: r };
-  Store.applyPlan(r.metadata.plan);
+  Store.applyPlan(r.metadata.plan, {
+    type: 'COUPLE_TO_SINGLE', appointmentId: appointment.id, removeMemberId
+  });
   return { ok: true, result: r };
 }
 
 export function lateCancel({ appointment, memberId }) {
   const r = recordLateCancel({ appointment, memberId, ctx: slotCtx(appointment.startsAt) });
   if (!r.allowed) return { ok: false, result: r };
-  Store.applyPlan(r.metadata.plan);
+  Store.applyPlan(r.metadata.plan, {
+    type: 'RECORD_LATE_CANCEL', appointmentId: appointment.id, memberId
+  });
   return { ok: true, result: r };
 }
 

@@ -208,25 +208,85 @@ function seed() {
 /* Kalıcılık                                                            */
 /* ------------------------------------------------------------------ */
 
-function load() {
+/* PAYLAŞILAN durum: randevular, üyeler, defter, ödemeler…
+   Supabase'te tek bir sürüm damgalı satırda tutulur, cihazlar arasında ortaktır. */
+let state = seed();
+
+/* CİHAZA ÖZEL oturum: paylaşılmaz.
+   Paylaşılsaydı iPhone'da Ahmet olarak giriş yapmak Mac'i de Ahmet yapardı. */
+const SESSION_KEY = KEY + '.session';
+function loadSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)) ?? null; } catch { return null; }
+}
+let session = loadSession();
+function saveSession() {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const s = JSON.parse(raw);
-      if (s && s.version === 1 && s.members) return s;
-    }
-  } catch { /* bozuk kayıt — sıfırdan */ }
-  return seed();
+    if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    else localStorage.removeItem(SESSION_KEY);
+  } catch { /* kota */ }
 }
 
-let state = load();
+/** Oturum, paylaşılan durumun üstüne bindirilerek verilir. */
+export const get = () => ({ ...state, session });
+export const rawState = () => state;
 
-export function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* kota */ }
+/* --- uzak senkronizasyon bağlantısı --- */
+
+let sync = null;           // { push(mutation, state, actor) } — main.mjs enjekte eder
+let onRemote = () => {};   // yeni durum geldiğinde arayüzü tazele
+let onError = () => {};    // yazma başarısız → kullanıcıya bildir
+
+export function attachSync(impl, { onRemoteState, onMutationError } = {}) {
+  sync = impl;
+  if (onRemoteState) onRemote = onRemoteState;
+  if (onMutationError) onError = onMutationError;
 }
 
-export function reset() { state = seed(); save(); return state; }
-export const get = () => state;
+/** Uzaktan gelen yetkili durumu benimser. Oturum korunur. */
+export function applyRemoteState(next) {
+  if (!next || !next.members) return;
+  state = next;
+  onRemote();
+}
+
+const actorLabel = () =>
+  session?.role === 'ADMIN' ? 'admin' : (session?.memberId ?? 'anon');
+
+/** Paylaşılan duruma yazma bekleniyor mu? */
+export let inFlight = 0;
+
+/**
+ * Yerel değişikliği uzak duruma yazar.
+ * İyimser: arayüz hemen güncellenir, yazma arka planda gider.
+ * Başarısızlıkta değişiklik GERİ ALINIR — sessizce yerel kalmaz (v0.5 §32).
+ */
+function commit(mutation) {
+  if (!sync) return Promise.resolve({ ok: true, local: true });
+  const snapshot = structuredClone(state);
+  inFlight++;
+  return sync.push(mutation, state, actorLabel())
+    .then((r) => {
+      if (!r.ok) { state = snapshot; onError(r); onRemote(); }
+      return r;
+    })
+    .catch((e) => {
+      state = snapshot; onError({ error: String(e) }); onRemote();
+      return { ok: false, error: String(e) };
+    })
+    .finally(() => { inFlight--; });
+}
+
+/** Eski çağrı yerleri için — artık yalnızca oturumu saklar. */
+export function save() { saveSession(); }
+
+/** Paylaşılan demoyu belirlenimci tohuma döndürür. Push abonelikleri KORUNUR. */
+export function reset() {
+  state = seed();
+  commit({ type: 'RESET_DEMO' });
+  return state;
+}
+
+export { seed as demoSeed };
 
 /* ------------------------------------------------------------------ */
 /* Sorgular                                                             */
@@ -241,7 +301,7 @@ export const memberByUsername = (u) => Object.values(state.members)
   .find(m => m.username.toLowerCase() === String(u).trim().toLowerCase()) ?? null;
 
 export const currentMember = () =>
-  state.session?.role === 'MEMBER' ? state.members[state.session.memberId] : null;
+  session?.role === 'MEMBER' ? state.members[session.memberId] : null;
 
 /** Bir üyenin randevuları, yeniden eskiye. */
 export function appointmentsOf(memberId) {
@@ -281,7 +341,7 @@ export function balanceOf(memberId) {
  * Gerçek üründe bu tek bir veritabanı transaction'ı olacak; burada
  * hepsi tek senkron blokta yapılır ki kısmi yazma oluşmasın.
  */
-export function applyPlan(plan) {
+export function applyPlan(plan, mutation) {
   if (!plan) return null;
 
   let appt = null;
@@ -319,7 +379,7 @@ export function applyPlan(plan) {
     });
   }
 
-  save();
+  if (mutation) commit({ ...mutation, appointmentId: mutation.appointmentId ?? appt?.id ?? null });
   return appt;
 }
 
@@ -339,36 +399,53 @@ export function moveAppointment(appointmentId, startsAt) {
     state.ledgers[mid] = led.map(e =>
       e.appointmentId === a.id ? { ...e, sessionStartsAt: startsAt } : e);
   }
-  save();
+
+  // Bildirim içeriği sunucuda kurulur; gereken alanlar mutasyonla taşınır.
+  commit({
+    type: 'MOVE_APPOINTMENT',
+    appointmentId: a.id,
+    oldStartsAt: startsAt - delta,
+    newStartsAt: startsAt,
+    startsAt,
+    serviceType: a.serviceType,
+    bookingMode: a.bookingMode,
+    memberIds: a.participants.map(p => p.memberId),
+    memberNames: a.participants.map(p => state.members[p.memberId]?.name).filter(Boolean)
+  });
   return a;
 }
 
 export function setAttendance(appointmentId, memberId, status) {
   const a = state.appointments.find(x => x.id === appointmentId);
   const p = a?.participants.find(x => x.memberId === memberId);
-  if (p) { p.attendanceStatus = status; save(); }
+  if (p) { p.attendanceStatus = status; commit({ type: 'SET_ATTENDANCE', appointmentId, memberId, status }); }
   return a;
 }
 
 export function toggleClosure(startsAt, reason) {
   const i = state.closures.findIndex(c => c.startsAt === startsAt);
-  if (i >= 0) state.closures.splice(i, 1);
+  const wasClosed = i >= 0;
+  if (wasClosed) state.closures.splice(i, 1);
   else state.closures.push({ startsAt, reason: reason || 'Yönetici kapattı' });
-  save();
+  commit({ type: wasClosed ? 'OPEN_SLOT' : 'CLOSE_SLOT', startsAt });
 }
 
 export function addPayment(p) {
   state.payments.push({ id: nid('pay'), ...p });
-  save();
+  commit({ type: 'ADD_PAYMENT', memberId: p.memberId, amount: p.amount });
 }
 
+/* Uygulama içi bildirim listesi bilerek CİHAZ YERELİ tutulur: her küçük
+   bildirim paylaşılan sürümü artırsaydı iki cihaz sürekli birbirini tazelerdi.
+   Gerçek cihazlar arası uyarı yolu Web Push. */
+const localNotes = [];
 export function notify(title, body) {
-  state.notifications.unshift({ id: nid('n'), title, body, at: Date.now(), read: false });
-  save();
+  localNotes.unshift({ id: nid('n'), title, body, at: Date.now(), read: false });
 }
+export const notifications = () => localNotes;
 
-export const unreadCount = () => state.notifications.filter(n => !n.read).length;
-export function markRead() { state.notifications.forEach(n => n.read = true); save(); }
+export const unreadCount = () => localNotes.filter(n => !n.read).length;
+export function markRead() { localNotes.forEach(n => n.read = true); }
 
 /* ------------------------------------------------------------------ */
 /* Oturum — DEMO                                                        */
@@ -378,8 +455,8 @@ export function signInMember(username, password) {
   const m = memberByUsername(username);
   if (!m || password !== DEMO_PASSWORD) return { ok: false, msg: 'Kullanıcı adı veya parola hatalı.' };
   if (!m.active) return { ok: false, msg: 'Üyeliğin aktif değil. Stüdyoyla iletişime geç.' };
-  state.session = { role: 'MEMBER', memberId: m.id };
-  save();
+  session = { role: 'MEMBER', memberId: m.id };
+  saveSession();
   return { ok: true, member: m };
 }
 
@@ -387,9 +464,9 @@ export function signInAdmin(username, password) {
   if (String(username).trim().toLowerCase() !== 'yonetici' || password !== DEMO_PASSWORD) {
     return { ok: false, msg: 'Kullanıcı adı veya parola hatalı.' };
   }
-  state.session = { role: 'ADMIN' };
-  save();
+  session = { role: 'ADMIN' };
+  saveSession();
   return { ok: true };
 }
 
-export function signOut() { state.session = null; save(); }
+export function signOut() { session = null; saveSession(); }

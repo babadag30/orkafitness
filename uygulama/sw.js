@@ -3,11 +3,11 @@
    Sürüm bilerek "demo" ön ekli: önizleme kendi kaynağında (preview URL)
    çalışır ve üretimdeki orka-v7 önbelleğine hiçbir şekilde dokunmaz. */
 
-const VERSION = 'orka-demo-1';
+const VERSION = 'orka-demo-2';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
-  './css/app.css?v=demo1',
-  './js/main.mjs?v=demo1',
+  './css/app.css?v=demo2',
+  './js/main.mjs?v=demo2',
   './assets/logo.png',
   './icons/icon-192.png', './icons/icon-512.png',
   './icons/apple-touch-icon.png', './icons/favicon-64.png'
@@ -63,4 +63,50 @@ self.addEventListener('fetch', (e) => {
       }).catch(() => caches.match(req))
     );
   }
+});
+
+/* ------------------------------------------------------------------ */
+/* Web Push                                                             */
+/* ------------------------------------------------------------------ */
+
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch { d = {}; }
+
+  const title = d.title || 'Orka EMS Fitness';
+  const options = {
+    body: d.body || '',
+    icon: './icons/icon-192.png',
+    badge: './icons/favicon-64.png',
+    // Aynı randevu için tekrar gelen bildirim üst üste yığılmaz
+    tag: d.tag || 'orka',
+    renotify: true,
+    data: { targetUrl: d.targetUrl || './index.html#/appointments', type: d.type || null }
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = event.notification.data?.targetUrl || './index.html#/appointments';
+
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    // Açık bir Orka penceresi varsa onu öne al — yeni sekme açma
+    for (const c of all) {
+      if (c.url.includes('/uygulama/')) {
+        await c.focus();
+        try { c.postMessage({ type: 'NAVIGATE', target }); } catch { /* önemli değil */ }
+        return;
+      }
+    }
+    // Yoksa ana ekran uygulamasını aç
+    await self.clients.openWindow(new URL(target, self.registration.scope).href);
+  })());
+});
+
+self.addEventListener('pushsubscriptionchange', (event) => {
+  // Abonelik döndüğünde istemci yeniden abone olur; burada sessizce geçiyoruz.
+  event.waitUntil(Promise.resolve());
 });
