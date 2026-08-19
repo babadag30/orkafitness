@@ -114,4 +114,44 @@
     badge.classList.add(isOpen ? 'is-open' : 'is-closed');
     badgeText.textContent = isOpen ? 'Şu an açık' : 'Şu an kapalı';
   }
+
+  /* ---------- 6. EMS suit koreografisi: merkez -> sol -> sağ ----------
+     Ironside'dan alınan yalnızca "kaydırmaya bağlı obje koreografisi" fikri;
+     hareketin eğrisi, mesafesi ve ritmi ORKA'ya özgü ve bilinçli olarak kısıtlı.
+
+     GÜVENLİK: bu blok hiç çalışmazsa suit CSS varsayılanıyla ortada durur ve
+     tüm metin normal akışta okunur. Hareket hiçbir içeriğin görünürlüğünü
+     taşımıyor. Mobilde ve reduced-motion'da tamamen devre dışı. */
+  const stage = $('#emsStage'), suit = $('#suit');
+  if (stage && suit && fine && !reduced && matchMedia('(min-width:861px)').matches) {
+    const ease = (t) => t * t * (3 - 2 * t);          // smoothstep
+    let sTick = false;
+
+    const place = () => {
+      sTick = false;
+      const r = stage.getBoundingClientRect();
+      const span = r.height - innerHeight;
+      if (span <= 0) return;
+      const p = Math.min(1, Math.max(0, -r.top / span));
+
+      // Faz 1 (0–.30): ortada, hafif yaklaşır
+      // Faz 2 (.30–.62): ölçülü biçimde sola
+      // Faz 3 (.62–1): sağa geçer
+      let x = 0;
+      if (p >= 0.30 && p < 0.62)      x = -ease((p - 0.30) / 0.32) * 15;
+      else if (p >= 0.62)             x = -15 + ease((p - 0.62) / 0.38) * 30;
+
+      const y = -ease(Math.min(1, p * 1.6)) * 2.5;     // çok hafif yükselme
+      const s = 1 - ease(Math.min(1, p)) * 0.06;       // hafif uzaklaşma
+
+      suit.style.setProperty('--sx', x.toFixed(2) + 'vw');
+      suit.style.setProperty('--sy', y.toFixed(2) + 'vh');
+      suit.style.setProperty('--ss', s.toFixed(3));
+    };
+
+    addEventListener('scroll', () => { if (!sTick) { sTick = true; requestAnimationFrame(place); } },
+      { passive: true });
+    addEventListener('resize', place, { passive: true });
+    place();
+  }
 })();

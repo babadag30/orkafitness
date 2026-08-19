@@ -582,3 +582,106 @@ html{scroll-behavior:smooth;scroll-padding-top:92px}
   .rkpair__r,.rkpair__k,.rkpair__link{animation:none}
   .svc{transition:none}
 }
+
+/* ==========================================================================
+   EMS BÖLÜMÜ — ORKA imza 3D suit sahnesi
+   Ironside'dan alınan YALNIZCA etkileşim mantığı: kaydırmaya bağlı obje
+   koreografisi ve sinematik obje varlığı. Obje, ışık, kompozisyon, hareket
+   dili, destek grafikleri ve içerik çerçevesi ORKA'ya özgüdür.
+
+   YAPI: sahne yüksekliğini metin fazları verir; suit yapışkan katmanda durur.
+   Metinler NORMAL AKIŞTA — JS çalışmasa da hepsi okunur kalır, suit ortada
+   sabit durur. Hiçbir içerik hareketin çalışmasına bağlı değildir.
+   ========================================================================== */
+
+.ems{padding-bottom:clamp(56px,7vw,96px)}
+.emsstage{position:relative;margin-top:clamp(24px,4vw,56px)}
+
+.emsstage__sticky{
+  position:sticky;top:0;height:100svh;
+  display:grid;place-items:center;
+  margin-bottom:-100svh;                 /* sahne yüksekliğine eklenmesin */
+  pointer-events:none;z-index:0;
+}
+
+/* ---------- suit ---------- */
+.suit{
+  position:relative;
+  width:clamp(230px,27vw,410px);
+  /* Koreografi değişkenleri; JS yoksa varsayılan = ortada, tam ölçek. */
+  transform:translate3d(var(--sx,0px),var(--sy,0px),0) scale(var(--ss,1));
+  will-change:transform;
+}
+.suit__img{width:100%;height:auto;display:block}
+
+/* çevresel ışık — suit'i carbon zeminden ayırır */
+.suit__halo{
+  position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+  width:150%;aspect-ratio:1;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(220,214,205,.10),transparent 62%);
+}
+
+/* göğüs arması — onaylı RK vektörü, gövde açısına hafif uydurulmuş */
+.suit__rk{
+  position:absolute;left:46.5%;top:25.5%;width:13%;
+  transform:translate(-50%,-50%) rotate(-3deg);
+  fill:rgba(244,241,236,.82);
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.45));
+}
+
+/* ---------- akım / elektrot ---------- */
+.suit__current{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ezline{stroke:rgba(143,22,27,.34);stroke-width:.4;fill:none}
+.ez{fill:var(--off);opacity:.15}
+@media (prefers-reduced-motion:no-preference){
+  .ez{animation:ezPulse 4.4s ease-in-out infinite;animation-delay:calc(var(--i) * .28s)}
+}
+@keyframes ezPulse{
+  0%,72%,100%{opacity:.14;r:1.5}
+  78%{opacity:.85;r:2.3}
+  86%{opacity:.3;r:1.7}
+}
+
+/* ---------- fazlar ---------- */
+.emsphases{position:relative;z-index:1}
+.emsphase{
+  min-height:100svh;display:flex;align-items:center;
+  padding-inline:var(--gut);max-width:var(--wrap);margin-inline:auto;
+}
+.emsphase__box{
+  /* Genişlik görünüm alanına bağlı: dar masaüstünde (1024–1280) kutu, suit'in
+     sürüklenme koridoruna girip üstüne biniyordu. */
+  max-width:min(400px,32vw);
+  background:linear-gradient(180deg,rgba(17,17,17,.86),rgba(17,17,17,.72));
+  border:1px solid var(--hairline);border-left:2px solid var(--red);
+  padding:clamp(22px,2.6vw,32px);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.emsphase__n{
+  display:block;font-family:var(--sora);font-weight:700;font-size:12px;
+  letter-spacing:.24em;color:var(--warm);margin-bottom:12px;
+}
+.emsphase__box h3{margin-bottom:10px}
+
+/* Faz 1 ortada-altta (suit ortada), faz 2 sağda (suit sola), faz 3 solda (suit sağa) */
+.emsphase--1{align-items:flex-end;justify-content:center;padding-bottom:6svh}
+.emsphase--2{justify-content:flex-end}
+.emsphase--3{justify-content:flex-start}
+
+/* ---------- mobil: koreografi sadeleşir ---------- */
+@media (max-width:860px){
+  /* Yapışkan sahne ve yatay sürüklenme kapalı: suit bir kez gösterilir,
+     fazlar normal blok olarak altına yığılır. Mobilde premium his korunur,
+     kaydırma ele geçirilmez. */
+  .emsstage__sticky{position:static;height:auto;margin-bottom:0;padding:8px 0 28px}
+  .suit{width:min(70vw,300px);transform:none!important}
+  .emsphase{min-height:0;display:block;padding-block:0}
+  .emsphase + .emsphase{margin-top:20px}
+  .emsphase__box{max-width:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+    background:var(--carbon-3)}
+  .emsphase--1{padding-bottom:0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .suit{transform:none!important}
+}
