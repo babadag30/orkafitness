@@ -23,7 +23,7 @@
   --hairline:#262626;      /* koyu zeminde ince çizgi */
   --off:#F4F1EC;
   --off-2:#EAE6DF;         /* açık bölümde kart */
-  --warm:#D7D1C9;          /* koyu zeminde ikincil metin (12,46x) */
+  --warm:#DBD5CD;          /* koyu zeminde ikincil metin (13,0x) */
   --graphite:#444444;
   --red:#8F161B;           /* panonun çalışan aksanı */
   --red-deep:#6B0F16;      /* palet Deep Red */
@@ -55,7 +55,7 @@ a{color:inherit;text-decoration:none}
 h1,h2,h3{margin:0;font-family:var(--sora);font-weight:700;line-height:1.08;
   letter-spacing:-.025em;text-wrap:balance}
 p{margin:0;text-wrap:pretty}
-ul{margin:0;padding:0;list-style:none}
+ul,ol{margin:0;padding:0;list-style:none}
 
 /* kaydırma: sabit başlık payı */
 html{scroll-behavior:smooth;scroll-padding-top:92px}
@@ -68,7 +68,7 @@ html{scroll-behavior:smooth;scroll-padding-top:92px}
 .sec--light{background:var(--off);color:var(--carbon)}
 .sec--light .eyebrow{color:var(--red)}          /* açık zeminde kırmızı metin AA (8,11x) */
 .sec--light .lede{color:#3A3A3A}
-.sec--light .muted{color:#5A5A5A}
+.sec--light .muted{color:#4E4A45}
 
 /* ---------- tipografik ölçek ---------- */
 .eyebrow{
@@ -303,9 +303,8 @@ html{scroll-behavior:smooth;scroll-padding-top:92px}
 .pairsvg .link{fill:none;stroke:var(--red);stroke-width:2}
 .pairsvg .off{stroke:#B4ADA2;stroke-dasharray:5 5}
 .pairsvg .slash{stroke:var(--red);stroke-width:2}
-.pairsvg text{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.16em;
-  text-transform:uppercase;fill:#5A5A5A}
-.pairsvg .lbl-on{fill:var(--carbon);font-weight:600}
+
+
 .chips{display:flex;flex-wrap:wrap;gap:10px}
 .chip{border:1px solid var(--carbon);padding:8px 15px;font-size:11px;font-weight:600;
   letter-spacing:.14em;text-transform:uppercase}
@@ -339,7 +338,7 @@ html{scroll-behavior:smooth;scroll-padding-top:92px}
 .foot__wm svg{fill:#1F1F1F;width:100%;height:auto}
 .foot__bar{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;
   align-items:center;border-top:1px solid var(--hairline);padding-top:26px;margin-top:38px}
-.foot__tag{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--graphite)}
+.foot__tag{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#7C766E}
 
 /* ============================ MOTION ============================ */
 /* İLKE: İçerik GÖRÜNÜRLÜĞÜ hiçbir koşulda çalışma zamanına bağlı değildir.
@@ -388,7 +387,11 @@ html{scroll-behavior:smooth;scroll-padding-top:92px}
   body{font-size:16px}
   .nav__in{height:64px}
   .mobmenu{inset-block-start:64px}
-  .hero{min-height:92svh}
+  /* Mobilde CTA altında gereğinden fazla boşluk kalıyordu: yükseklik içerikten
+     türesin, yalnızca alt sınır korunsun. Sinematik varlık korunur. */
+  .hero{min-height:auto;padding-top:calc(64px + 28px);padding-bottom:44px}
+  .hero__grid{padding-block:0}
+  .hero__copy{gap:20px}
   .hero__scrim{background:
     linear-gradient(180deg,rgba(17,17,17,.82) 0%,rgba(17,17,17,.72) 45%,var(--carbon) 100%)}
   .stat{border-right:0;border-bottom:1px solid var(--hairline);padding-bottom:22px}
@@ -397,4 +400,185 @@ html{scroll-behavior:smooth;scroll-padding-top:92px}
   .slot{border-bottom:1px solid var(--hairline)}
   .scrollhint{display:none}
   .foot__bar{flex-direction:column;align-items:flex-start}
+}
+
+
+/* ==========================================================================
+   SANAT YÖNETİMİ KATMANI — "kontrollü güç"
+   Kural: hareket yalnızca BAĞLANTI, YÖN, DERİNLİK ve GEÇİŞ anlatır.
+   Hiçbir animasyon içeriğin görünürlüğünden sorumlu değildir (fill-mode yok).
+   ========================================================================== */
+
+/* ---------- 1. İmza etkileşimi: mekânsal ışık alanı ----------
+   İşaretçiyi izleyen çok yumuşak bir aydınlanma. İçeriğin ARKASINDA durur,
+   dururken fark edilmez, hareket ederken hissedilir. Özel imleç, parçacık,
+   parlayan halka YOK. Yalnızca graphite + çok kısılmış deep red. */
+.field{
+  position:fixed;inset:0;z-index:-3;pointer-events:none;
+  opacity:0;transition:opacity .8s var(--ease);
+  background:
+    radial-gradient(760px circle at var(--mx,50%) var(--my,42%),
+      rgba(68,68,68,.30), transparent 62%),
+    radial-gradient(420px circle at var(--mx,50%) var(--my,42%),
+      rgba(143,22,27,.055), transparent 58%);
+}
+.field.is-on{opacity:1}
+
+/* ---------- 2. Hero derinliği: ayrı mekânsal katmanlar ----------
+   Her katman farklı hızda: atmosfer en yavaş, marka işareti ters yönde,
+   diyagonal düzlemler arada, içerik neredeyse sabit. Sinematik derinlik. */
+.hero__bg{transform:translate3d(var(--bgX,0px),var(--bgY,0px),0)}
+.hero__mark{transform:translate3d(var(--mkX,0px),var(--mkY,0px),0)}
+.hero .slants{transform:translate3d(var(--slX,0px),0,0)}
+.hero__copy{transform:translate3d(var(--cpX,0px),0,0)}
+
+/* ---------- 3. Bölüm geçişleri: ORKA SPLIT geometrisi ----------
+   Yatay/dikdörtgen kesim yerine diyagonal kama + ince kırmızı bağlayıcı.
+   Sayfa mimarisi de SPLIT / CONNECTION / CONTINUITY anlatsın diye yalnızca
+   üç anlamlı geçişte kullanılır — her bölüm arasına dekor konmaz.
+   Not: tam genişlikte 22° pratik değil; oran korunarak sığ tutuldu. */
+.split-top{position:relative;overflow:hidden}
+.split-top::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:var(--wedge,132px);
+  background:var(--wedge-color,var(--carbon));
+  clip-path:polygon(0 0,100% 0,0 100%);
+}
+.split-top.is-mirror::before{clip-path:polygon(0 0,100% 0,100% 100%)}
+/* Diyagonal boyunca ince kırmızı bağlayıcı — "connection" */
+.split-top::after{
+  content:"";position:absolute;left:-2%;width:104%;top:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--red) 22%,var(--red) 78%,transparent);
+  transform-origin:left center;opacity:.5;
+  transform:translateY(var(--wedge,132px)) rotate(var(--wedgeDeg,-5.4deg));
+}
+.split-top.is-mirror::after{
+  transform-origin:right center;
+  transform:translateY(0) rotate(var(--wedgeDeg,-5.4deg));
+}
+.split-top > .wrap{position:relative;z-index:1}
+
+/* ---------- 4. Hizmet kartları: marka geometrisi + ölçülü eğim ---------- */
+.svcgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:clamp(20px,3vw,36px);perspective:1200px}
+.svc{
+  position:relative;overflow:hidden;isolation:isolate;
+  border:1px solid #D8D2C9;background:var(--off-2);
+  padding:clamp(28px,3.4vw,44px);
+  display:flex;flex-direction:column;gap:14px;
+  transition:transform .5s var(--ease),border-color .35s var(--ease),box-shadow .5s var(--ease);
+  transform-style:preserve-3d;
+}
+/* asimetri: ikinci kart hafifçe düşer */
+.svc:nth-child(2){margin-top:clamp(0px,2.4vw,34px)}
+/* köşede diyagonal düzlem — kitin "connected strength" karosu */
+.svc::before{
+  content:"";position:absolute;right:-22%;top:-46%;width:78%;height:150%;
+  background:rgba(17,17,17,.045);transform:rotate(var(--slant));z-index:-1;
+  transition:transform .6s var(--ease),background .4s;
+}
+/* RK açısını taşıyan kırmızı bağlayıcı — hover'da uzar */
+.svc::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:0;
+  background:var(--red);transition:width .5s var(--ease);
+}
+.svc:hover{border-color:#B4ADA2;box-shadow:0 18px 44px rgba(26,23,28,.13)}
+.svc:hover::before{transform:rotate(var(--slant)) translateY(-4%)}
+.svc:hover::after{width:100%}
+.svc__meta{display:flex;align-items:center;gap:12px}
+.svc__k{width:26px;height:2px;background:var(--red);flex:none}
+.svc__label{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#5A5450}
+.svc h3{font-size:clamp(26px,3.2vw,38px)}
+.svc .lede{color:#3A3A3A}
+
+/* ---------- 5. Nasıl Çalışır V2 ---------- */
+/* BİRİNCİL: yolculuk. Rakamlar büyük, aralarında sürekli bir hat. */
+.journey{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:clamp(24px,3vw,44px);counter-reset:j;position:relative;
+  margin-bottom:clamp(56px,7vw,96px);
+}
+.jstep{position:relative;padding-top:34px;border-top:1px solid var(--hairline)}
+.jstep::before{content:"";position:absolute;top:-1px;left:0;width:46px;height:2px;background:var(--red)}
+.jstep__n{
+  display:block;font-family:var(--sora);font-weight:700;
+  font-size:clamp(40px,5vw,64px);line-height:1;letter-spacing:-.04em;
+  color:transparent;-webkit-text-stroke:1.5px #5A5A5A;
+  margin-bottom:14px;transition:-webkit-text-stroke-color .4s var(--ease)}
+.jstep:hover .jstep__n{-webkit-text-stroke-color:var(--warm)}
+.jstep h3{margin-bottom:10px}
+
+/* İKİNCİL: kapasite davranışı — 8 saat kutusu değil, 4 durum. */
+.capacity{border-top:1px solid var(--hairline);padding-top:clamp(28px,3.5vw,40px)}
+.capgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:clamp(12px,1.6vw,20px);margin:22px 0 18px}
+.capstate{
+  border:1px solid var(--hairline);padding:20px 18px 18px;
+  display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;
+  transition:border-color .3s var(--ease),background .3s var(--ease)}
+.capstate:hover{border-color:var(--graphite);background:var(--carbon-3)}
+.capstate b{font-family:var(--sora);font-size:20px;font-weight:700;letter-spacing:-.02em}
+.capstate span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--warm)}
+/* üç dikey ray — kapasitenin kendisi */
+.rails{display:flex;gap:6px;align-items:flex-end;height:38px}
+.rails i{width:10px;height:100%;border:1px solid var(--graphite);display:block;position:relative}
+.rails i.on{background:var(--off);border-color:var(--off)}
+.capstate--hold .rails i.on{background:var(--warm);border-color:var(--warm)}
+.capstate--hold{border-bottom-color:var(--red)}
+.capstate--hold::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:var(--red)}
+.capstate--off{background:#0C0C0C}
+.capstate--off .rails i.on{background:var(--graphite);border-color:var(--graphite)}
+.capstate--off b,.capstate--off span{color:var(--warm);opacity:.75}
+.capstate--off::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(112deg,transparent 0 17px,rgba(143,22,27,.20) 17px 18px)}
+
+/* ---------- 6. Çift seansı imza görseli: gerçek R + K ---------- */
+.rkpair{width:min(100%,460px);height:auto;overflow:visible}
+.rkpair path{fill:var(--carbon)}
+.rkpair__r{animation:joinL .9s var(--ease)}
+.rkpair__k{animation:joinR .9s var(--ease)}
+@keyframes joinL{from{transform:translateX(-46px);opacity:.25}to{transform:none;opacity:1}}
+@keyframes joinR{from{transform:translateX(46px);opacity:.25}to{transform:none;opacity:1}}
+.rkpair__link{
+  stroke:var(--red);stroke-width:4.5;stroke-linecap:round;
+  stroke-dasharray:42;animation:joinLink .7s var(--ease) .35s}
+@keyframes joinLink{from{stroke-dashoffset:42}to{stroke-dashoffset:0}}
+
+.pairlabels{display:flex;flex-wrap:wrap;gap:18px;margin-top:6px}
+.pairlabels span{display:inline-flex;align-items:center;gap:9px;
+  font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#3A3632}
+.pairlabels i{width:9px;height:9px;background:var(--carbon);flex:none}
+.pairlabels .is-off{color:#6E675F}
+.pairlabels .is-off i{background:none;border:1px dashed #9A938A}
+
+/* üçüncü kontenjan: üç bar, üçüncüsü kırmızı diyagonalle kapalı */
+.thirdslot{display:flex;gap:8px;align-items:flex-end;height:44px;margin-top:4px}
+.thirdslot__bar{width:26px;height:100%;background:var(--carbon);display:block}
+.thirdslot__bar.is-blocked{
+  background:none;border:1px dashed #A79F95;position:relative}
+.thirdslot__bar.is-blocked::after{
+  content:"";position:absolute;inset:-1px;
+  background:linear-gradient(112deg,transparent calc(50% - 1px),var(--red) 50%,transparent calc(50% + 1px))}
+
+/* ---------- 7. Stüdyo galerisi ---------- */
+.galcell{margin:0;overflow:hidden;border:1px solid var(--hairline);position:relative}
+.galcell img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(1) contrast(1.04) brightness(.96);
+  transform:scale(1.02);transition:filter .6s var(--ease),transform .8s var(--ease)}
+.galcell:hover img{filter:grayscale(.15) contrast(1.02) brightness(1.04);transform:scale(1.05)}
+.gal{display:grid;gap:14px;grid-template-columns:repeat(4,1fr);grid-auto-rows:268px}
+.gal .galcell:nth-child(1){grid-column:span 2}
+.gal .galcell:nth-child(1) img{object-position:center 34%}
+.gal .galcell:nth-child(4){grid-column:span 2}
+
+@media (max-width:900px){
+  .gal{grid-template-columns:repeat(2,1fr);grid-auto-rows:180px}
+  .gal .galcell:nth-child(1),.gal .galcell:nth-child(4){grid-column:span 2}
+}
+
+/* ---------- 8. Hareket kısıtı ---------- */
+@media (prefers-reduced-motion:reduce){
+  .field{display:none}
+  .hero__bg,.hero__mark,.hero .slants,.hero__copy{transform:none!important}
+  .rkpair__r,.rkpair__k,.rkpair__link{animation:none}
+  .svc{transition:none}
 }

@@ -24,6 +24,7 @@
    onfocus="this.style.left='12px';this.style.top='12px';this.style.zIndex=99"
    onblur="this.style.left='-9999px'">İçeriğe atla</a>
 
+<div class="field" id="field" aria-hidden="true"></div>
 <div class="progress" id="progress"></div>
 
 <header class="nav" id="nav">
@@ -60,6 +61,7 @@
     </picture>
   </div>
   <div class="hero__scrim"></div>
+  <div class="slants" aria-hidden="true"><i style="left:18%"></i><i style="left:52%"></i><i style="left:82%"></i></div>
   <div class="wrap hero__grid">
     <div class="hero__copy">
       <span class="status" id="status"><i></i><span id="statusText">Çalışma saatleri</span></span>
@@ -105,7 +107,7 @@
 </section>
 
 <!-- ===================== HİZMETLER (açık oda) ===================== -->
-<section class="sec sec--light" id="hizmetler">
+<section class="sec sec--light split-top" id="hizmetler" style="--wedge-color:var(--carbon)">
   <div class="slants" aria-hidden="true"><i style="left:22%"></i><i style="left:72%"></i></div>
   <div class="wrap">
     <div class="head reveal">
@@ -113,18 +115,18 @@
       <h2 class="h2">İki çalışma biçimi</h2>
       <p class="lede">Her ikisi de 25 dakika sürer ve antrenör eşliğinde yapılır. Kontenjan sınırlıdır.</p>
     </div>
-    <div class="two">
-      <article class="card reveal"><span class="card__k"></span>
-        <p class="eyebrow" style="margin-bottom:16px">25 dakika · 1–3 kişi</p>
-        <h3 class="h3">EMS</h3>
-        <p class="lede" style="margin-top:12px">Elektrot kıyafetiyle yapılan uyarımlı antrenman. Antrenör
+    <div class="svcgrid">
+      <article class="svc reveal">
+        <div class="svc__meta"><span class="svc__k"></span><span class="svc__label">25 dakika · 1–3 kişi</span></div>
+        <h3>EMS</h3>
+        <p class="lede">Elektrot kıyafetiyle yapılan uyarımlı antrenman. Antrenör
           uyarım şiddetini seans boyunca kişiye göre ayarlar.</p>
-        <p style="margin-top:20px"><a class="btn btn--ghost" href="#cift">Çift seansı bu hizmette →</a></p>
+        <p style="margin-top:8px"><a class="btn btn--ghost" href="#cift">Çift seansı bu hizmette</a></p>
       </article>
-      <article class="card reveal" data-d="1"><span class="card__k"></span>
-        <p class="eyebrow" style="margin-bottom:16px">25 dakika · 1 kişi</p>
-        <h3 class="h3">Fitness</h3>
-        <p class="lede" style="margin-top:12px">Birebir çalışılan klasik antrenman. Program ve tempo tek kişiye
+      <article class="svc reveal" data-d="1">
+        <div class="svc__meta"><span class="svc__k"></span><span class="svc__label">25 dakika · 1 kişi</span></div>
+        <h3>Fitness</h3>
+        <p class="lede">Birebir çalışılan klasik antrenman. Program ve tempo tek kişiye
           göre kurulur, stüdyo o seans boyunca yalnızca sana ayrılır.</p>
       </article>
     </div>
@@ -136,32 +138,45 @@
   <div class="wrap">
     <div class="head reveal">
       <p class="eyebrow">Nasıl Çalışır</p>
-      <h2 class="h2">Aynı anda en fazla 3 kişi</h2>
-      <p class="lede">Stüdyoda tek seferde üç kişiden fazlası çalışmaz. Her seans saatinin
-        bu yüzden bir durumu vardır — aşağıda örnek bir pazartesi.</p>
+      <h2 class="h2">Üç adımda seansın</h2>
+      <p class="lede">Stüdyoda tek seferde üç kişiden fazlası çalışmaz.
+        Akış bu kapasiteye göre kurulur.</p>
     </div>
-    <div class="legend reveal">
-      <div><span class="seatkey"><i></i><i></i><i></i></span>Doğrudan randevu alınabilir</div>
-      <div><span class="seatkey"><i class="hold"></i><i class="hold"></i><i></i></span>Kısmen dolu · yönetici onayı</div>
-      <div><span class="seatkey"><i class="on"></i><i class="on"></i><i class="on"></i></span>Kapalı veya dolu</div>
-    </div>
-    <div class="day reveal" id="day"><div class="slot slot--uygun"><div class="slot__t mono">08:00</div><div class="slot__seats"><i class=""></i><i class=""></i><i class=""></i></div><div class="slot__s">Uygun</div></div><div class="slot slot--uygun"><div class="slot__t mono">10:00</div><div class="slot__seats"><i class="on"></i><i class=""></i><i class=""></i></div><div class="slot__s">Uygun</div></div><div class="slot slot--onay"><div class="slot__t mono">12:00</div><div class="slot__seats"><i class="hold"></i><i class="hold"></i><i class=""></i></div><div class="slot__s">Onay gerekir</div></div><div class="slot slot--uygun"><div class="slot__t mono">14:00</div><div class="slot__seats"><i class="on"></i><i class=""></i><i class=""></i></div><div class="slot__s">Uygun</div></div><div class="slot slot--dolu"><div class="slot__t mono">16:00</div><div class="slot__seats"><i class="on"></i><i class="on"></i><i class="on"></i></div><div class="slot__s">Dolu</div></div><div class="slot slot--onay"><div class="slot__t mono">18:00</div><div class="slot__seats"><i class="hold"></i><i class="hold"></i><i class=""></i></div><div class="slot__s">Onay gerekir</div></div><div class="slot slot--dolu"><div class="slot__t mono">20:00</div><div class="slot__seats"><i class="on"></i><i class="on"></i><i class="on"></i></div><div class="slot__s">Kapalı</div></div><div class="slot slot--uygun"><div class="slot__t mono">22:00</div><div class="slot__seats"><i class=""></i><i class=""></i><i class=""></i></div><div class="slot__s">Uygun</div></div></div>
-    <p class="small muted reveal" style="margin-top:18px">Kısmen dolu saatlerde talebini iletirsin,
-      stüdyo onaylar. Dolu saatler kapalıdır.</p>
 
-    <div class="flow">
-      <div class="step reveal"><b></b><em>01 · Seç</em>
-        <p class="lede">Uygulamadan uygun bir saat seçersin. Kontenjan doluysa saat en baştan kapalı görünür.</p></div>
-      <div class="step reveal" data-d="1"><b></b><em>02 · Onay</em>
-        <p class="lede">Kısmen dolu saatlerde talebin stüdyoya düşer; antrenör kontenjanı görüp onaylar.</p></div>
-      <div class="step reveal" data-d="2"><b></b><em>03 · Antrenman</em>
-        <p class="lede">Kıyafet ve cihaz seansından önce hazırlanır. 25 dakika, tek antrenör, üç kişiye kadar.</p></div>
+    <!-- BİRİNCİL ANLATIM: yolculuk -->
+    <ol class="journey">
+      <li class="jstep reveal">
+        <span class="jstep__n">01</span>
+        <h3 class="h3">Seç</h3>
+        <p class="lede">Uygulamadan uygun bir saat seçersin. Kontenjan doluysa
+          saat en baştan kapalı görünür.</p>
+      </li>
+      <li class="jstep reveal" data-d="1">
+        <span class="jstep__n">02</span>
+        <h3 class="h3">Onay</h3>
+        <p class="lede">Kısmen dolu saatlerde talebin stüdyoya düşer; antrenör
+          kontenjanı görüp onaylar.</p>
+      </li>
+      <li class="jstep reveal" data-d="2">
+        <span class="jstep__n">03</span>
+        <h3 class="h3">Antrenman</h3>
+        <p class="lede">Kıyafet ve cihaz seanstan önce hazırlanır. 25 dakika,
+          tek antrenör, üç kişiye kadar.</p>
+      </li>
+    </ol>
+
+    <!-- İKİNCİL: kapasitenin davranışı -->
+    <div class="capacity reveal">
+      <p class="eyebrow">Kapasite davranışı</p>
+      <div class="capgrid"><div class="capstate capstate--ok"><div class="rails"><i class=""></i><i class=""></i><i class=""></i></div><b class="mono">0/3</b><span>Uygun</span></div><div class="capstate capstate--ok"><div class="rails"><i class="on"></i><i class=""></i><i class=""></i></div><b class="mono">1/3</b><span>Uygun</span></div><div class="capstate capstate--hold"><div class="rails"><i class="on"></i><i class="on"></i><i class=""></i></div><b class="mono">2/3</b><span>Onay gerekir</span></div><div class="capstate capstate--off"><div class="rails"><i class="on"></i><i class="on"></i><i class="on"></i></div><b class="mono">3/3</b><span>Kapalı</span></div></div>
+      <p class="small muted">Üç kontenjanın ikisi dolduğunda saat onaya düşer;
+        üçü de dolduğunda kapanır.</p>
     </div>
   </div>
 </section>
 
 <!-- ===================== ÇİFT SEANSI (açık oda) ===================== -->
-<section class="sec sec--light" id="cift">
+<section class="sec sec--light split-top is-mirror" id="cift" style="--wedge-color:var(--carbon)">
   <div class="slants" aria-hidden="true"><i style="left:16%"></i><i style="left:84%"></i></div>
   <div class="wrap two" style="align-items:center">
     <div class="reveal">
@@ -175,35 +190,37 @@
       <div class="chips" style="margin-top:24px">
         <span class="chip chip--red">Partnerimle</span>
         <span class="chip">Münhasır seans</span>
-        <span class="chip chip--off">Üçüncü kontenjan kapalı</span>
       </div>
     </div>
     <div class="pair reveal" data-d="1" id="pair">
-      <svg class="pairsvg" viewBox="0 0 600 300" role="img"
-           aria-label="İki bağlı üye profili ve kapatılmış üçüncü kontenjan">
-        <path class="link" style="--l:300" d="M120 132 C 160 78, 260 78, 300 132"/>
-        <defs>
-          <clipPath id="cutA"><rect x="60" y="150" width="120" height="120" transform="rotate(-22 120 150)"/></clipPath>
-          <clipPath id="cutB"><rect x="240" y="150" width="120" height="120" transform="rotate(-22 300 150)"/></clipPath>
-        </defs>
-        <circle class="node node--on" cx="120" cy="150" r="46"/>
-        <circle class="split" cx="120" cy="150" r="46" clip-path="url(#cutA)"/>
-        <circle class="node node--on" cx="300" cy="150" r="46"/>
-        <circle class="split" cx="300" cy="150" r="46" clip-path="url(#cutB)"/>
-        <circle class="node off" cx="480" cy="150" r="46"/>
-        <line class="slash" x1="450" y1="180" x2="510" y2="120"/>
-        <text class="lbl-on" x="120" y="228" text-anchor="middle">Üye</text>
-        <text class="lbl-on" x="300" y="228" text-anchor="middle">Partner</text>
-        <text x="480" y="228" text-anchor="middle">Kapalı</text>
-        <text x="210" y="66" text-anchor="middle" fill="#8F161B">Bağlı</text>
+      <!-- Markanın kendi geometrisi: soldaki R, sağdaki K. Dinlenme durumu
+           BİRLEŞİK hâldir (RK); animasyon onları yalnızca geçici olarak ayırıp
+           birleştirir. Animasyon çalışmazsa doğru lockup zaten görünür. -->
+      <svg class="rkpair" viewBox="-40 -40 344 200" role="img"
+           aria-label="İki üye profili ORKA sembolünün R ve K parçaları olarak birleşiyor; üçüncü kontenjan kapalı">
+        <g class="rkpair__r"><path d="M1 4 L1 13 C1 18 5 19 10 19 L104 19 C113 19 118 26 118 35 C118 42 114 49 107 51 L76 51 L162 111 L195 112 L123 63 C132 56 136 46 136 34 C136 17 123 3 109 3 Z"/></g>
+        <g class="rkpair__k"><path d="M233 0 L162 57 L228 112 L257 112 L191 57 L264 0 Z"/></g>
+        <line class="rkpair__link" x1="126" y1="58" x2="168" y2="58"/>
       </svg>
-      <p class="small muted">İki bağlı profil · üçüncü kontenjan kapalı</p>
+
+      <div class="pairlabels">
+        <span><i></i>Üye</span>
+        <span><i></i>Partner</span>
+        <span class="is-off"><i></i>Üçüncü kontenjan — kapalı</span>
+      </div>
+
+      <div class="thirdslot" aria-hidden="true">
+        <span class="thirdslot__bar"></span>
+        <span class="thirdslot__bar"></span>
+        <span class="thirdslot__bar is-blocked"></span>
+      </div>
+      <p class="small muted">İki bağlı profil tek bir kimlik gibi çalışır · üçüncü kontenjan kapanır</p>
     </div>
   </div>
 </section>
 
 <!-- ===================== STÜDYO ===================== -->
-<section class="sec" id="studyo">
+<section class="sec split-top" id="studyo" style="--wedge-color:var(--off)">
   <div class="wrap">
     <div class="head reveal">
       <p class="eyebrow">Stüdyo</p>
@@ -211,23 +228,12 @@
       <p class="lede">Tek salonlu, üç kişilik kapasiteye göre kurulmuş bir stüdyo. Cihazlar, kıyafetler
         ve alan her seans arasında hazırlanır. Kalabalık yok, sıra beklemek yok.</p>
     </div>
-    <div class="gal reveal"><a href="uploads/1-.png" target="_blank" rel="noopener"><img src="assets/img/studyo-1.webp" alt="Orka EMS Fitness stüdyosundan kare" loading="lazy" width="1086" height="1448"></a><a href="uploads/2-.png" target="_blank" rel="noopener"><img src="assets/img/studyo-2.webp" alt="Orka EMS Fitness stüdyosundan kare" loading="lazy" width="1086" height="1448"></a><a href="uploads/3-.png" target="_blank" rel="noopener"><img src="assets/img/studyo-3.webp" alt="Orka EMS Fitness stüdyosundan kare" loading="lazy" width="1086" height="1448"></a><a href="uploads/4-.png" target="_blank" rel="noopener"><img src="assets/img/studyo-4.webp" alt="Orka EMS Fitness stüdyosundan kare" loading="lazy" width="1086" height="1448"></a></div>
-  </div>
-</section>
-
-<!-- ===================== INSTAGRAM ===================== -->
-<section class="sec" id="instagram" style="padding-top:0">
-  <div class="wrap">
-    <div class="head reveal">
-      <p class="eyebrow">Instagram</p>
-      <h2 class="h2">Stüdyodan son paylaşımlar</h2>
-      <p class="lede">@fit2tech.burdur hesabındaki güncel gönderiler.</p>
+    <div class="gal reveal">
+      <figure class="galcell"><img src="assets/img/studyo-1.webp" alt="Stüdyo duvarı ve aydınlatma detayı" loading="lazy" decoding="async"></figure>
+      <figure class="galcell"><img src="assets/img/studyo-2.webp" alt="Kardiyo alanı" loading="lazy" decoding="async"></figure>
+      <figure class="galcell"><img src="assets/img/studyo-3.webp" alt="Ağırlık ve fonksiyonel alan" loading="lazy" decoding="async"></figure>
+      <figure class="galcell"><img src="assets/img/studyo-4.webp" alt="Koşu bandı detayı" loading="lazy" decoding="async"></figure>
     </div>
-    <div class="gal gal--sq reveal"><a href="https://instagram.com/fit2tech.burdur" target="_blank" rel="noopener" aria-label="Instagram gönderisi"><img src="uploads/fit2tech.burdur_1783708830_3938357134747217661_58597298047_1.jpg" alt="Fit2tech Instagram gönderisi" loading="lazy"></a><a href="https://instagram.com/fit2tech.burdur" target="_blank" rel="noopener" aria-label="Instagram gönderisi"><img src="uploads/fit2tech.burdur_1784756055_3947142014935052809_58597298047_1.jpg" alt="Fit2tech Instagram gönderisi" loading="lazy"></a><a href="https://instagram.com/fit2tech.burdur" target="_blank" rel="noopener" aria-label="Instagram gönderisi"><img src="uploads/fit2tech.turkiye_1775553842_3869948580882838457_9618356685_1.webp" alt="Fit2tech Instagram gönderisi" loading="lazy"></a><a href="https://instagram.com/fit2tech.burdur" target="_blank" rel="noopener" aria-label="Instagram gönderisi"><img src="uploads/fit2tech.turkiye_1776853771_3880853094657697310_9618356685_1.webp" alt="Fit2tech Instagram gönderisi" loading="lazy"></a><a href="https://instagram.com/fit2tech.burdur" target="_blank" rel="noopener" aria-label="Instagram gönderisi"><img src="uploads/fit2tech.turkiye_1779186410_3900420749628973046_9618356685_1.webp" alt="Fit2tech Instagram gönderisi" loading="lazy"></a><a href="https://instagram.com/fit2tech.burdur" target="_blank" rel="noopener" aria-label="Instagram gönderisi"><img src="uploads/fit2tech.burdur_1774913165_3864574136656132182_58597298047_1.jpg" alt="Fit2tech Instagram gönderisi" loading="lazy"></a></div>
-    <p class="small muted reveal" style="margin-top:18px">
-      Gönderiler Instagram hesabından otomatik güncellenir.
-      <a href="https://instagram.com/fit2tech.burdur" target="_blank" rel="noopener"
-         style="border-bottom:1px solid var(--graphite);margin-left:8px">Takip et</a></p>
   </div>
 </section>
 

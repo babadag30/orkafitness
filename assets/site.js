@@ -1,45 +1,92 @@
 /* ORKA EMS Fitness — site davranışı.
-   Bağımlılık yok, build yok. Yalnızca transform/opacity animasyonu → CLS yaratmaz.
+   Bağımlılık yok, build yok. Yalnızca transform/opacity → CLS yaratmaz.
 
-   İLKE: JS içeriği GÖSTERMEZ, yalnızca zenginleştirir.
-   Açığa çıkarma tamamen CSS'te (animation-timeline / @keyframes both). Bu dosya
-   hiç çalışmasa da sayfanın tamamı okunur durumda kalır. */
+   İLKE: JS içeriği GÖSTERMEZ, yalnızca zenginleştirir. Açığa çıkarma tamamen
+   CSS'te ve hiçbir giriş animasyonunda fill-mode yok; bu dosya hiç çalışmasa
+   da sayfanın tamamı okunur durumda kalır. */
 (() => {
   'use strict';
-  const doc = document.documentElement;
-
+  const $ = (s, r = document) => r.querySelector(s);
+  const root = document.documentElement;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const $  = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  /* İnce işaretçi + hover yeteneği = masaüstü. Dokunmatikte tüm bu katman kapalı. */
+  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-  /* ---------- 1. Scroll ilerleme çizgisi + nav durumu ---------- */
-  const bar = $('#progress'), nav = $('#nav');
-  let ticking = false;
+  /* ---------- 1. Kaydırma: ilerleme, nav, hero derinliği ---------- */
+  const bar = $('#progress'), nav = $('#nav'), heroBg = $('#heroBg'), hero = $('.hero');
+  let sy = 0, ticking = false;
+
   const onScroll = () => {
-    const y = scrollY;
-    const max = document.body.scrollHeight - innerHeight;
-    if (bar) bar.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
-    if (nav) nav.style.background = y > 40 ? 'rgba(17,17,17,.92)' : 'rgba(17,17,17,.72)';
-    if (heroBg && !reduced) heroBg.style.transform = `translate3d(0,${Math.min(y, innerHeight) * 0.18}px,0)`;
     ticking = false;
+    sy = scrollY;
+    const max = document.body.scrollHeight - innerHeight;
+    if (bar) bar.style.width = (max > 0 ? (sy / max) * 100 : 0) + '%';
+    if (nav) nav.style.background = sy > 40 ? 'rgba(17,17,17,.92)' : 'rgba(17,17,17,.72)';
+    if (hero && !reduced) {
+      // Atmosfer en yavaş katman; marka işareti ters yönde. Sinematik derinlik.
+      const d = Math.min(sy, innerHeight);
+      hero.style.setProperty('--bgY', (d * 0.16) + 'px');
+      hero.style.setProperty('--mkY', (d * -0.06) + 'px');
+    }
   };
-  const heroBg = $('#heroBg');
-  addEventListener('scroll', () => {
-    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
-  }, { passive: true });
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } },
+    { passive: true });
   onScroll();
 
-  /* ---------- 3. RK sembolü kendini çizer (kit 05) ---------- */
-  const mark = $('#heroMark');
-  if (mark) {
-    $$('path', mark).forEach(p => {
-      const len = Math.ceil(p.getTotalLength());
-      p.style.setProperty('--len', len);
-    });
-    requestAnimationFrame(() => mark.classList.add('drawn'));
+  /* ---------- 2. İmza etkileşimi: mekânsal ışık alanı + hero katmanları ----------
+     Tek bir rAF döngüsü, hedefe doğru yumuşatma (lerp). Dururken fark edilmez,
+     hareket ederken hissedilir. Özel imleç / parçacık / parlama yok. */
+  const field = $('#field');
+  if (fine && !reduced) {
+    let tx = innerWidth / 2, ty = innerHeight * 0.42;   // hedef
+    let cx = tx, cy = ty;                               // yumuşatılmış
+    let raf = 0, moved = false;
+
+    addEventListener('pointermove', (e) => {
+      tx = e.clientX; ty = e.clientY;
+      if (!moved) { moved = true; field && field.classList.add('is-on'); }
+      if (!raf) raf = requestAnimationFrame(loop);
+    }, { passive: true });
+
+    function loop() {
+      cx += (tx - cx) * 0.075;
+      cy += (ty - cy) * 0.075;
+
+      if (field) {
+        field.style.setProperty('--mx', (cx / innerWidth * 100).toFixed(2) + '%');
+        field.style.setProperty('--my', (cy / innerHeight * 100).toFixed(2) + '%');
+      }
+      if (hero) {
+        // Katmanlar farklı yönde ve genlikte: derinlik hissi, 3B gösterisi değil.
+        const nx = (cx / innerWidth - 0.5);      // -0.5 … 0.5
+        const ny = (cy / innerHeight - 0.5);
+        hero.style.setProperty('--mkX', (nx * -20).toFixed(1) + 'px');
+        hero.style.setProperty('--slX', (nx * 12).toFixed(1) + 'px');
+        hero.style.setProperty('--cpX', (nx * 3).toFixed(1) + 'px');
+        hero.style.setProperty('--bgX', (nx * 8).toFixed(1) + 'px');
+      }
+
+      // Hedefe yeterince yaklaşınca döngüyü bırak — boşa çerçeve harcanmaz.
+      if (Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4) raf = requestAnimationFrame(loop);
+      else raf = 0;
+    }
   }
 
-  /* ---------- 6. Mobil menü ---------- */
+  /* ---------- 3. Hizmet kartlarında ölçülü eğim (maks ~1.5°) ---------- */
+  if (fine && !reduced) {
+    for (const card of document.querySelectorAll('.svc')) {
+      card.addEventListener('pointermove', (e) => {
+        const b = card.getBoundingClientRect();
+        const px = (e.clientX - b.left) / b.width - 0.5;
+        const py = (e.clientY - b.top) / b.height - 0.5;
+        card.style.transform =
+          `rotateY(${(px * 2.4).toFixed(2)}deg) rotateX(${(-py * 1.8).toFixed(2)}deg) translateZ(0)`;
+      });
+      card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+    }
+  }
+
+  /* ---------- 4. Mobil menü ---------- */
   const burger = $('#burger'), mob = $('#mobmenu');
   if (burger && mob) {
     const setMenu = (open) => {
@@ -47,21 +94,19 @@
       mob.classList.toggle('open', open);
       document.body.style.overflow = open ? 'hidden' : '';
     };
-    burger.addEventListener('click', () =>
-      setMenu(burger.getAttribute('aria-expanded') !== 'true'));
+    burger.addEventListener('click', () => setMenu(burger.getAttribute('aria-expanded') !== 'true'));
     mob.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
     addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
     matchMedia('(min-width:1041px)').addEventListener('change', (m) => { if (m.matches) setMenu(false); });
   }
 
-  /* ---------- 7. Canlı açık / kapalı rozeti ----------
+  /* ---------- 5. Canlı açık / kapalı rozeti ----------
      Saatler sitedeki tabloyla ve stüdyo politikasıyla aynı:
-     Pzt–Cmt 08:00–23:30 · Paz 10:00–22:00. Tek yerde tanımlı. */
+     Pzt–Cmt 08:00–23:30 · Paz 10:00–22:00. Stüdyo saatinde (UTC+3) hesaplanır. */
   const HOURS = { 0: [600, 1320], 1: [480, 1410], 2: [480, 1410], 3: [480, 1410],
                   4: [480, 1410], 5: [480, 1410], 6: [480, 1410] };
   const badge = $('#status'), badgeText = $('#statusText');
   if (badge && badgeText) {
-    // Stüdyo saati (TRT, UTC+3) — ziyaretçinin cihaz saat diliminden bağımsız.
     const now = new Date(Date.now() + 180 * 60000);
     const mins = now.getUTCHours() * 60 + now.getUTCMinutes();
     const [open, close] = HOURS[now.getUTCDay()];
